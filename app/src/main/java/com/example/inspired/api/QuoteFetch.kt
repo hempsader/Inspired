@@ -14,16 +14,14 @@ class QuoteFetch {
             .build()
     }
 
-    fun fetchQuote(): MutableLiveData<Quote> {
-
-        var mutableLiveData = MutableLiveData<Quote>()
+    fun fetchQuote(quoteValue :(quote: Quote) -> Unit){
         fetchRandomQuote().create(QuoteApi::class.java).fetchRandomQuestion().enqueue(object:
             Callback<JsonObject>{
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
                 val jsonOBj = response.body()?.get("quote")
                 val quote = Quote(jsonOBj?.asJsonObject?.get("_id")!!.toString(),
                 jsonOBj?.asJsonObject["quoteText"]!!.toString(),jsonOBj?.asJsonObject["quoteAuthor"]!!.toString())
-                mutableLiveData.value = quote
+               quoteValue(quote)
             }
 
             override fun onFailure(call: Call<JsonObject>, t: Throwable) {
@@ -31,6 +29,5 @@ class QuoteFetch {
             }
 
         })
-        return mutableLiveData
     }
 }

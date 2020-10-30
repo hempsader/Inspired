@@ -1,5 +1,6 @@
 package com.example.inspired.repository
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.inspired.api.QuoteFetch
 import com.example.inspired.model.Quote
@@ -9,5 +10,10 @@ class RepositoryFetch(){
     init {
         quoteFetch = QuoteFetch()
     }
-    fun fetchQuote(): MutableLiveData<Quote> = quoteFetch.fetchQuote()
+    fun fetchQuote(fetch :(quote: Quote)-> Unit) {
+        val mutableLiveData: MutableLiveData<Quote> = MutableLiveData()
+        quoteFetch.fetchQuote {
+            fetch(it)
+        }
+    }
 }

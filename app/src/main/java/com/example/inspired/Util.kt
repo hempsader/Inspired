@@ -1,23 +1,17 @@
 package com.example.inspired
 
 import android.content.Context
+import android.hardware.camera2.params.Capability
 import android.net.ConnectivityManager
 import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 
 class Util {
     fun isInternetConnected(context: Context): Boolean{
-        var state = false
-        val connManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        connManager.registerDefaultNetworkCallback(object: ConnectivityManager.NetworkCallback(){
-            override fun onAvailable(network: Network) {
-                super.onAvailable(network)
-                state = true
-            }
-            override fun onLost(network: Network) {
-                super.onLost(network)
-                state = false
-            }
-        })
-        return state
+        val nm = context.getSystemService(ConnectivityManager::class.java)
+        val currentNetwork = nm.activeNetwork
+        val capabilities = nm.getNetworkCapabilities(currentNetwork)
+        return  capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
     }
 }
