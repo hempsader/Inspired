@@ -10,6 +10,8 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.os.Bundle
+import android.telecom.ConnectionService
+import android.util.Log
 import androidx.core.app.DialogCompat
 import androidx.fragment.app.DialogFragment
 
@@ -20,16 +22,35 @@ class Util(private val context: Context) {
         val capabilities = nm.getNetworkCapabilities(currentNetwork)
         return  capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
     }
-    fun dialogIsNotInternet(){
-         object : DialogFragment(){
-            override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-                val builder = AlertDialog.Builder(context)
-                builder.setMessage("No Internet Connection, switching to offline mode!")
-                    .setNeutralButton("Ok",DialogInterface.OnClickListener { dialogInterface, i ->
-                        dialogInterface.dismiss()
-                    })
-                return builder.create()
+
+    fun internetMonitoring() : Boolean {
+        var isAvaiable = true
+        Log.d("aa",isAvaiable.toString())
+        val networkManager = context.getSystemService(ConnectivityManager::class.java)
+        networkManager.registerDefaultNetworkCallback(object: ConnectivityManager.NetworkCallback(){
+            override fun onAvailable(network: Network) {
+                super.onAvailable(network)
+               isAvaiable = true
             }
+
+            override fun onLost(network: Network) {
+                super.onLost(network)
+                isAvaiable = false
+            }
+        })
+        return  isAvaiable
+    }
+
+     fun dialogNoInternet(){
+        val builder = androidx.appcompat.app.AlertDialog.Builder(context)
+        builder.apply {
+            setTitle("No Internet Connection!")
+                .setMessage("No Internet Connection!, switching to offline mode!")
+            setCancelable(false)
+            setNegativeButton("OK",DialogInterface.OnClickListener { dialogInterface, i ->
+                dialogInterface.cancel()
+            })
         }
+        builder.create().show()
     }
 }

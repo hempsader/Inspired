@@ -2,6 +2,7 @@ package com.example.inspired.room
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.inspired.model.Quote
 
@@ -13,7 +14,7 @@ interface QuoteDao{
     @Query("select * from quote where _id like :id")
     fun findQuote(id: String): Quote
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertQuote(quote: Quote)
 
 }

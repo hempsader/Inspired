@@ -11,7 +11,6 @@ class RepositoryFetch(){
         quoteFetch = QuoteFetch()
     }
     fun fetchQuote(fetch :(quote: Quote)-> Unit) {
-        val mutableLiveData: MutableLiveData<Quote> = MutableLiveData()
         quoteFetch.fetchQuote {
             fetch(it)
         }
