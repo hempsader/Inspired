@@ -35,18 +35,29 @@ class SettingsActivity : AppCompatActivity() {
 
 
     class SettingsFragment : PreferenceFragmentCompat() {
-        private lateinit var dailyEnable: SwitchPreferenceCompat
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_set, rootKey)
             val roomEnable: SwitchPreferenceCompat? = findPreference("room")
-             dailyEnable = findPreference("daily_quote")!!
+            val dailyEnable: SwitchPreferenceCompat? = findPreference("daily_quote")!!
             val randomColor: SwitchPreferenceCompat? = findPreference("colors")
             val hourPref: ListPreference? = findPreference("daily")
-            dailyEnable.setOnPreferenceChangeListener(//pune listener)
+            dailyEnable?.setOnPreferenceChangeListener(preferenceListencer)
+            roomEnable?.setOnPreferenceChangeListener(preferenceListencer)
+            randomColor?.setOnPreferenceChangeListener(preferenceListencer)
+            hourPref?.setOnPreferenceChangeListener(preferenceListencer)
       }
 
 
+        val preferenceListencer: Preference.OnPreferenceChangeListener = object: Preference.OnPreferenceChangeListener{
+            override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
+               when(preference?.key){
+                   "daily_quote" -> SharedPrefUtil.saveDailyEnable(requireContext(), newValue as Boolean)
+                   "room" -> SharedPrefUtil.saveRoomEnable(requireContext(),newValue as Boolean)
+                   "colors" -> SharedPrefUtil.saveColorEnable(requireContext(),newValue as Boolean)
+                   "daily" -> SharedPrefUtil.saveHourDaily(requireContext(),newValue as String)
+               }
+                return true
+            }
+        }
     }
-
-
 }
