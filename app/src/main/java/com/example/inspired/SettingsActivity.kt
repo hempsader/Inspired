@@ -48,7 +48,7 @@ class SettingsActivity : AppCompatActivity() {
       }
 
 
-        val preferenceListencer: Preference.OnPreferenceChangeListener = object: Preference.OnPreferenceChangeListener{
+        private val preferenceListencer: Preference.OnPreferenceChangeListener = object: Preference.OnPreferenceChangeListener{
             override fun onPreferenceChange(preference: Preference?, newValue: Any?): Boolean {
                when(preference?.key){
                    "daily_quote" -> SharedPrefUtil.saveDailyEnable(requireContext(), newValue as Boolean)

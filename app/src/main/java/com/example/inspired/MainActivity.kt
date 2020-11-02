@@ -14,6 +14,9 @@ import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import com.example.inspired.model.Quote
 import com.example.inspired.repository.Repository
 import com.example.inspired.util.SharedPrefUtil
@@ -40,6 +43,9 @@ class MainActivity : AppCompatActivity() {
         button = findViewById(R.id.button)
         util = Util(this)
         repository = Repository.get()!!
+
+
+
 
         if(!util.isInternetConnected()){
             util.dialogNoInternet()
@@ -97,11 +103,14 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         connectivityManager = getSystemService(ConnectivityManager::class.java)
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
-        if(SharedPrefUtil.getDailyEnabled(this)!!){
-            Log.d("aa",true.toString())
-        }else{
-            Log.d("aa",false.toString())
-        }
+
+
+
+        val uploadWorkRequest: WorkRequest = OneTimeWorkRequest.from(DailyQuote::class.java)
+
+        WorkManager.getInstance(this@MainActivity).enqueue(uploadWorkRequest)
+
+
     }
 
     private val networkCallback = object :  ConnectivityManager.NetworkCallback() {
