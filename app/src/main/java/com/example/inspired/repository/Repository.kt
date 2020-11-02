@@ -5,6 +5,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.inspired.model.Quote
 import java.lang.IllegalStateException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class Repository private constructor(private val context: Context){
     private var repositoryFetch: RepositoryFetch
@@ -23,15 +25,16 @@ class Repository private constructor(private val context: Context){
             }
         }
         fun get() = initialise
+
     }
+    fun getExecutor(): ExecutorService =  Executors.newFixedThreadPool(1)
 
     fun questionFetch(fetch: (quote: Quote)-> Unit) {
         repositoryFetch.fetchQuote {
             fetch(it)
         }
     }
-    fun getRandomQuote(): Quote = respositoryRoom.getRandomQuote()
-    fun suffiecientQuote(): Boolean = respositoryRoom.sufficientQuotes()
+    suspend fun getRandomQuote(): Quote = respositoryRoom.getRandomQuote()
     fun insertQuote(quote: Quote) {
         respositoryRoom.insertQuote(quote)
     }

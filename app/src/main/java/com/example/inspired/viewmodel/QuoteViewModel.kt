@@ -19,4 +19,5 @@ class QuoteViewModel() : ViewModel(){
                 quoteViewModel.value = it
             }
     }
+    fun getQuoteValue() = quoteViewModel.value
 }

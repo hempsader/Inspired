@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <SwitchPreferenceCompat
+        app:key="room"
+        app:title="Enable quote catch offline" />
+    <SwitchPreferenceCompat
+        app:key="colors"
+        app:title="Each quote have different color" />
+
+
+
+    <ListPreference
+        app:entries="@array/hour_entries"
+        app:entryValues="@array/hour_values"
+        app:key="daily"
+        app:defaultValue="nine"
+        app:title="Notification hour"
+        app:useSimpleSummaryProvider="true"
+        />
+
+    <SwitchPreferenceCompat
+        app:key="daily_quote"
+        app:summaryOff="Daily quote disabled"
+        app:summaryOn="Daily quote enabled"
+        app:title="Daily Quote" />
+</PreferenceScreen>
