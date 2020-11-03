@@ -1,8 +1,6 @@
 package com.example.inspired
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.ListPreference
@@ -10,7 +8,6 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.example.inspired.util.SharedPrefUtil
-import kotlinx.android.synthetic.main.activity_main.*
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -41,10 +38,10 @@ class SettingsActivity : AppCompatActivity() {
             val dailyEnable: SwitchPreferenceCompat? = findPreference("daily_quote")!!
             val randomColor: SwitchPreferenceCompat? = findPreference("colors")
             val hourPref: ListPreference? = findPreference("daily")
-            dailyEnable?.setOnPreferenceChangeListener(preferenceListencer)
-            roomEnable?.setOnPreferenceChangeListener(preferenceListencer)
-            randomColor?.setOnPreferenceChangeListener(preferenceListencer)
-            hourPref?.setOnPreferenceChangeListener(preferenceListencer)
+            dailyEnable?.onPreferenceChangeListener = preferenceListencer
+            roomEnable?.onPreferenceChangeListener = preferenceListencer
+            randomColor?.onPreferenceChangeListener = preferenceListencer
+            hourPref?.onPreferenceChangeListener = preferenceListencer
       }
 
 

@@ -1,14 +1,11 @@
 package com.example.inspired.repository
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.example.inspired.model.Quote
-import java.lang.IllegalStateException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class Repository private constructor(private val context: Context){
+class Repository private constructor(context: Context){
     private var repositoryFetch: RepositoryFetch
     private var respositoryRoom: RepositoryRoom
 

@@ -20,7 +20,7 @@ class Util(private val context: Context) {
             setTitle("No Internet Connection!")
                 .setMessage("No Internet Connection!, switching to offline mode!")
             setCancelable(false)
-            setNegativeButton("OK",DialogInterface.OnClickListener { dialogInterface, i ->
+            setNegativeButton("OK", { dialogInterface, i ->
                 dialogInterface.cancel()
             })
         }

@@ -2,7 +2,6 @@ package com.example.inspired.util
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import com.example.inspired.model.Quote
 
 class SharedPrefUtil {
     companion object {
@@ -50,6 +49,29 @@ class SharedPrefUtil {
                 .putString("author",author).apply()
         }
 
-        fun save
+        fun saveNotifQuote(context: Context, quote: String){
+            PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putString("quote",quote).apply()
+        }
+
+        fun getNotifAuthor(context: Context): String? {
+            val pref = PreferenceManager.getDefaultSharedPreferences(context)
+            return pref.getString("author","No Data Yet")
+        }
+
+        fun getNotifQuote(context: Context): String? {
+            val pref = PreferenceManager.getDefaultSharedPreferences(context)
+            return pref.getString("quote","No Data Yet")
+        }
+
+        fun setClickedOnNotif(context: Context, clicked: Boolean){
+            PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putBoolean("notifClick",clicked).apply()
+        }
+
+        fun getClickedOnNotif(context: Context): Boolean? {
+            val pref = PreferenceManager.getDefaultSharedPreferences(context)
+            return pref.getBoolean("notifClick",false)
+        }
     }
 }

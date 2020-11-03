@@ -1,18 +1,11 @@
 package com.example.inspired
 
 import DailyQuote
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.Network
-import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -20,25 +13,17 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
-import androidx.concurrent.futures.CallbackToFutureAdapter
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.*
-import com.example.inspired.api.QuoteFetch
-import com.example.inspired.model.Quote
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import com.example.inspired.repository.Repository
 import com.example.inspired.util.SharedPrefUtil
 import com.example.inspired.util.Util
 import com.example.inspired.viewmodel.QuoteViewModel
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.gson.JsonObject
 import kotlinx.coroutines.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : VisibleActivity() {
     private lateinit var quoteViewModel: QuoteViewModel
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var util: Util
@@ -55,9 +40,13 @@ class MainActivity : AppCompatActivity() {
         inspireMe = findViewById(R.id.inspireMe)
         quoteText = findViewById(R.id.quote_text)
         button = findViewById(R.id.button)
+        quoteViewModel = ViewModelProvider(this)[QuoteViewModel::class.java]
+        animStart = AnimationUtils.loadAnimation(this, R.anim.anim_inspire)
+        animStop = AnimationUtils.loadAnimation(this, R.anim.stop_anim)
+        animOffline = AnimationUtils.loadAnimation(this, R.anim.anim_offline)
         util = Util(this)
         repository = Repository.get()!!
-        Log.d("aa", intent.getBooleanExtra("boss",false).toString())
+
 
         if (!util.isInternetConnected()) {
             util.dialogNoInternet()
@@ -74,23 +63,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        val quote = Quote(
-            "5eb17aadb69dc744b4e7258c",
-            "Why don't you start believing that no matter what you have or haven't done, that your best days are still out in front of you.",
-            "Joel Osteen"
-        )
-        val quote2 = Quote(
-            "5eb17asdasadb69dc744b4e7258c",
-            "aici ii distractie, sa dansez, sa mananc",
-            "draga"
-        )
-        repository.insertQuote(quote)
 
-        quoteViewModel = ViewModelProvider(this)[QuoteViewModel::class.java]
-        animStart = AnimationUtils.loadAnimation(this, R.anim.anim_inspire)
-        animStop = AnimationUtils.loadAnimation(this, R.anim.stop_anim)
-        animOffline = AnimationUtils.loadAnimation(this, R.anim.anim_offline)
+
         quoteViewModel.quoteViewModel.observe(this, { quoteModel ->
+
             GlobalScope.launch(Dispatchers.Main) {
                 GlobalScope.async {
                     withContext(Dispatchers.Main) {
@@ -120,16 +96,12 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         connectivityManager = getSystemService(ConnectivityManager::class.java)
         connectivityManager.registerDefaultNetworkCallback(networkCallback)
-
-
-
         val uploadWorkRequest: WorkRequest = OneTimeWorkRequest.from(DailyQuote::class.java)
         WorkManager.getInstance(this@MainActivity).enqueue(uploadWorkRequest)
-
-
+        quoteText.text = SharedPrefUtil.getNotifAuthor(this).toString()
     }
 
-    private val networkCallback = object :  ConnectivityManager.NetworkCallback() {
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: Network) {
             super.onAvailable(network)
             runOnUiThread{
@@ -139,6 +111,7 @@ class MainActivity : AppCompatActivity() {
                         startAnimation(animStart)
                         isEnabled = false
                         quoteViewModel.fetchQuote()
+                        SharedPrefUtil.setClickedOnNotif(this@MainActivity,true)
                     }
                 }
             }
@@ -161,6 +134,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         connectivityManager.unregisterNetworkCallback(networkCallback)
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -168,6 +142,8 @@ class MainActivity : AppCompatActivity() {
         inflater.inflate(R.menu.menu,menu)
         return true
     }
+
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){

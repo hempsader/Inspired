@@ -1,15 +1,14 @@
 package com.example.inspired.repository
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import com.example.inspired.model.Quote
 import com.example.inspired.model.QuoteDatabase
-import kotlinx.coroutines.*
-import okhttp3.Dispatcher
-import java.util.concurrent.Executors
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 
-class RepositoryRoom(private val context: Context) {
+class RepositoryRoom(context: Context) {
     private val db = Room.databaseBuilder(context, QuoteDatabase::class.java,"quote_db").fallbackToDestructiveMigration().build()
     private val dao = db.quoteDao()
 
@@ -23,7 +22,7 @@ class RepositoryRoom(private val context: Context) {
        return quote!!
     }
 
-    private suspend  fun returnQuote(): Quote {
+    private fun returnQuote(): Quote {
        return dao.getAllQuotes().shuffled().first()
     }
     fun insertQuote(quote: Quote) {
