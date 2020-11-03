@@ -2,6 +2,7 @@ package com.example.inspired.util
 
 import android.content.Context
 import androidx.preference.PreferenceManager
+import com.example.inspired.model.Quote
 
 class SharedPrefUtil {
     companion object {
@@ -43,5 +44,12 @@ class SharedPrefUtil {
             val pref = PreferenceManager.getDefaultSharedPreferences(context)
             return  pref.getString("hourDaily","nine")
         }
+
+        fun saveNotifAuthor(context: Context, author: String){
+            PreferenceManager.getDefaultSharedPreferences(context).edit()
+                .putString("author",author).apply()
+        }
+
+        fun save
     }
 }

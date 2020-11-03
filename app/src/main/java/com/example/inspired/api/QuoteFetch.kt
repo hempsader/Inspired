@@ -14,7 +14,7 @@ class QuoteFetch {
             .build()
     }
 
-    fun fetchQuote(quoteValue :(quote: Quote) -> Unit){
+    fun fetchQuote(quoteValue :(quote: Quote) -> Unit) {
         fetchRandomQuote().create(QuoteApi::class.java).fetchRandomQuestion().enqueue(object:
             Callback<JsonObject>{
             override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
@@ -29,5 +29,9 @@ class QuoteFetch {
             }
 
         })
+    }
+
+    fun fetchQuoteAsync(): Call<JsonObject> {
+       return fetchRandomQuote().create(QuoteApi::class.java).fetchRandomQuestion()
     }
 }
