@@ -69,4 +69,5 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:$work_version"
     implementation 'com.jakewharton.retrofit:retrofit2-kotlin-coroutines-experimental-adapter:1.0.0'
     implementation "androidx.concurrent:concurrent-futures-ktx:1.1.0"
+    implementation "io.reactivex.rxjava3:rxjava:3.0.0"
 }
