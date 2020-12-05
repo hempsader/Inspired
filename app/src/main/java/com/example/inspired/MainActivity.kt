@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
             }
         })[ViewModelTest::class.java]
     }
-    private val internetUtil = InternetUtil(this)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,9 +35,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        GlobalScope.launch {
-            val x =  internetUtil.openChannel().consumeAsFlow()
-            x.collect {
+        GlobalScope.launch(Dispatchers.IO) {
+            InternetUtil.checkInternet(this@MainActivity, Dispatchers.IO).collect {
                 Log.d("aa", it.toString())
             }
         }
@@ -46,15 +45,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         GlobalScope.launch {
-            internetUtil.cancelInternetCheck()
+            InternetUtil.cancelInternetCheck()
         }
         super.onPause()
-
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        internetUtil.cancelInternetCheck()
+        InternetUtil.cancelInternetCheck()
     }
 }
 
