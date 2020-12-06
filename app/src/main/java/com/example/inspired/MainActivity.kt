@@ -2,41 +2,36 @@ package com.example.inspired
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.inspired.api.QuoteApi
 import com.example.inspired.model.ViewModelTest
 import com.example.inspired.util.InternetUtil
+import com.example.inspired.util.State
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.consume
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
 
 
-class MainActivity : AppCompatActivity() {
-    val viewModel by lazy {
-        ViewModelProvider(this, object: ViewModelProvider.Factory{
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return ViewModelTest(this@MainActivity) as T
-            }
-        })[ViewModelTest::class.java]
-    }
-
-
+class MainActivity : UtilActivity() {
+    private var job: Job? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-
     }
 
     override fun onResume() {
-        GlobalScope.launch(Dispatchers.IO) {
-            InternetUtil.checkInternet(this@MainActivity, Dispatchers.IO).collect {
+     job  =   GlobalScope.launch(Dispatchers.IO) {
+            internetFlow().asFlow().collectLatest {
                 Log.d("aa", it.toString())
             }
         }
@@ -44,15 +39,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        GlobalScope.launch {
-            InternetUtil.cancelInternetCheck()
-        }
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        InternetUtil.cancelInternetCheck()
+        job?.cancel()
+        job = null
     }
 }
 
