@@ -18,7 +18,7 @@ interface QuoteApi{
             .build().create(QuoteApi::class.java)
     }
 
-    @GET("api/v2/quotes/random")
+    @GET("api/v3/quotes/random")
     suspend fun getRandomQuote(): Response<QuoteResponse>
 
 }

@@ -17,15 +17,10 @@ import kotlinx.coroutines.flow.internal.ChannelFlow
 import kotlin.coroutines.CoroutineContext
 
 class InternetUtil() {
-
-
-
     companion object {
-
-
         @RequiresApi(Build.VERSION_CODES.N)
         fun checkInternet(context: Context, coroutineContext: CoroutineContext) =
-            callbackFlow<State> {
+            callbackFlow {
                 val manager =
                     context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val state =
