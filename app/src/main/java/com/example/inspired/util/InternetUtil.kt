@@ -1,5 +1,6 @@
 package com.example.inspired.util
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -16,7 +17,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.internal.ChannelFlow
 import kotlin.coroutines.CoroutineContext
 
-class InternetUtil() {
+class InternetUtil(private val context: Context) {
     companion object {
         @RequiresApi(Build.VERSION_CODES.N)
         fun checkInternet(context: Context, coroutineContext: CoroutineContext) =
