@@ -25,8 +25,8 @@ class QuoteRepositoryImpl(context: Context): QuoteRepository{
         TODO("Not yet implemented")
     }
 
-    override suspend fun getQuoteRandomFromDb(): QuoteResponse.Quote {
-        TODO("Not yet implemented")
+    override suspend fun getQuoteRandomFromDb(): List<QuoteResponse.Quote>? {
+        return dao?.randomQuoteDbPull()
     }
 
 }

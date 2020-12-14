@@ -12,7 +12,7 @@ interface QuoteDao{
     suspend fun getFavourites(): List<QuoteResponse.Quote>
 
     @Query("select * from quote_db")
-    suspend fun randomQuoteDbPull(): QuoteResponse.Quote
+    suspend fun randomQuoteDbPull(): List<QuoteResponse.Quote>
 
     @Delete
     suspend fun delete(quote: QuoteResponse.Quote)

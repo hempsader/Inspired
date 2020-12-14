@@ -41,13 +41,13 @@ open class UtilActivity : AppCompatActivity() {
         super.onResume()
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
         job?.cancel()
         job = null
         if (Build.VERSION.SDK_INT < 24 ) {
             unregisterReceiver(broadcast)
         }
+        super.onStop()
     }
 
     override fun onDestroy() {

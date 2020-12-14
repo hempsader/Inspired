@@ -15,9 +15,10 @@ import kotlin.coroutines.coroutineContext
 
 class QuoteViewModel(private val repository: QuoteRepositoryImpl,private val coroutineScope: CoroutineContext): ViewModel(){
     private val quoteMutableData = MutableLiveData<ResponseQuoteRandom>()
-
+    private val quoteLocalMutableData = MutableLiveData<QuoteResponse.Quote>()
 
     fun observeRemoteQuote(): LiveData<ResponseQuoteRandom> = quoteMutableData
+    fun observerLocalQuote(): LiveData<QuoteResponse.Quote> = quoteLocalMutableData
 
     fun fetchQuoteRemote(){
         GlobalScope.launch(context = coroutineScope) {
@@ -28,6 +29,17 @@ class QuoteViewModel(private val repository: QuoteRepositoryImpl,private val cor
                 quoteMutableData.postValue(ResponseQuoteRandom.ResponseUnsuccessfull("Ups, something went wrong, fetching offline!"))
             }
         }
+    }
 
+    fun fetchLocalQuote() {
+        GlobalScope.launch(context = coroutineScope) {
+            quoteLocalMutableData.postValue(repository.getQuoteRandomFromDb()?.random())
+        }
+    }
+
+    fun insertOfflineQuote(quote:QuoteResponse.Quote?){
+        GlobalScope.launch(context = coroutineScope) {
+            repository.insertQuote(quote!!)
+        }
     }
 }
