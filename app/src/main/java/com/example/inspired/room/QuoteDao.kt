@@ -14,6 +14,9 @@ interface QuoteDao{
     @Query("select * from quote_db")
     suspend fun randomQuoteDbPull(): List<QuoteResponse.Quote>
 
+    @Update(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun updateFavourite(quote: QuoteResponse.Quote)
+
     @Delete
     suspend fun delete(quote: QuoteResponse.Quote)
 

@@ -13,8 +13,8 @@ class QuoteRepositoryImpl(context: Context): QuoteRepository{
         dao?.insert(quote)
     }
 
-    override suspend fun getFavourites(): List<QuoteResponse.Quote> {
-        TODO("Not yet implemented")
+    override suspend fun getFavourites(): List<QuoteResponse.Quote>? {
+        return dao?.getFavourites()
     }
 
     override suspend fun randomQuote(): Response<QuoteResponse> {
@@ -27,6 +27,10 @@ class QuoteRepositoryImpl(context: Context): QuoteRepository{
 
     override suspend fun getQuoteRandomFromDb(): List<QuoteResponse.Quote>? {
         return dao?.randomQuoteDbPull()
+    }
+
+    override suspend fun updateQuote(quote: QuoteResponse.Quote) {
+        dao?.updateFavourite(quote)
     }
 
 }

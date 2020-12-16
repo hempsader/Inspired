@@ -42,4 +42,10 @@ class QuoteViewModel(private val repository: QuoteRepositoryImpl,private val cor
             repository.insertQuote(quote!!)
         }
     }
+
+    fun favouriteQuote(quote: QuoteResponse.Quote?){
+        GlobalScope.launch(context = coroutineScope) {
+            repository.updateQuote(quote!!)
+        }
+    }
 }

@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.inspired.model.QuoteResponse
 
-@Database(entities = [QuoteResponse.Quote::class], version = 1)
+@Database(entities = [QuoteResponse.Quote::class], version = 4)
 abstract class QuoteDatabase : RoomDatabase(){
     abstract fun quoteDao(): QuoteDao
 
@@ -15,7 +15,7 @@ abstract class QuoteDatabase : RoomDatabase(){
 
         fun instance(context: Context): QuoteDatabase? {
             synchronized(Any()){
-                val db = Room.databaseBuilder(context,QuoteDatabase::class.java,"quote_db").build()
+                val db = Room.databaseBuilder(context,QuoteDatabase::class.java,"quote_db").fallbackToDestructiveMigration().build()
                 INSTANCE = db
             }
             return INSTANCE
