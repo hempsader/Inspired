@@ -5,14 +5,13 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.fragment.app.*
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.ViewPager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.inspired.repository.QuoteRepositoryImpl
@@ -30,19 +29,19 @@ import kotlin.coroutines.CoroutineContext
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var viewPager: ViewPager2
+    private lateinit var viewPager: ViewPager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        viewPager = findViewById(R.id.pager)
+        viewPager = findViewById(R.id.viewPager)
 
 
-        val pagerAdapter = ScreenSlidePagerAdapter(this)
+        val pagerAdapter = ScreenSlidePagerAdapter(supportFragmentManager)
         viewPager.adapter = pagerAdapter
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
             override fun onTabReselected(tab: TabLayout.Tab?) {
-                pager.currentItem = tab?.position!!
+                viewPager.currentItem = tab?.position!!
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -53,10 +52,7 @@ class MainActivity : AppCompatActivity() {
 
             }
         })
-
-        tabLayout.addTab(tabLayout.newTab().setText("Tab 1 Item"))
-        tabLayout.addTab(tabLayout.newTab().setText("Tab 2 Item"))
-
+        setupTabs()
     }
 
     override fun onBackPressed() {
@@ -71,20 +67,23 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private inner class ScreenSlidePagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
-        override fun getItemCount(): Int = 2
-
-        override fun createFragment(position: Int): Fragment {
-            when(position){
-                1 ->return FragmentFavourite()
-                2 ->return FragmentRandom()
-                else -> return FragmentRandom()
-           }
+    private inner class ScreenSlidePagerAdapter(fa: FragmentManager) : FragmentStatePagerAdapter(fa) {
+        override fun getItem(position: Int): Fragment {
+            return when(position) {
+                0 -> FragmentRandom()
+                1 -> FragmentFavourite()
+                else -> FragmentRandom()
+            }
         }
+        override fun getCount(): Int = 2
+
     }
 
-
-
+    private fun setupTabs(){
+        tabLayout.setupWithViewPager(viewPager)
+        tabLayout.getTabAt(0)?.setText("Random")
+        tabLayout.getTabAt(1)?.setText("Favourite")
+    }
 }
 
 
