@@ -1,9 +1,16 @@
 package com.example.inspired.repository
 
 import android.content.Context
+import android.util.Log
+import androidx.lifecycle.LiveData
 import com.example.inspired.api.QuoteApi
 import com.example.inspired.model.QuoteResponse
 import com.example.inspired.room.QuoteDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import retrofit2.Response
 
 class QuoteRepositoryImpl(context: Context): QuoteRepository{
@@ -13,12 +20,13 @@ class QuoteRepositoryImpl(context: Context): QuoteRepository{
         dao?.insert(quote)
     }
 
-    override suspend fun getFavourites(): List<QuoteResponse.Quote>? {
-        return dao?.getFavourites()
+    override fun getFavourites(): Flow<List<QuoteResponse.Quote>> {
+        return dao?.getFavourites()!!
     }
 
+
     override suspend fun randomQuote(): Response<QuoteResponse> {
-      return QuoteApi.get().getRandomQuote()
+        return QuoteApi.get().getRandomQuote()
     }
 
     override suspend fun deleteFavQuote(quote: QuoteResponse.Quote) {
@@ -33,4 +41,9 @@ class QuoteRepositoryImpl(context: Context): QuoteRepository{
         dao?.updateFavourite(quote)
     }
 
+    override suspend fun fetchAll(): Flow<List<QuoteResponse.Quote>> {
+      return  dao?.fetchAll()!!
+    }
+
 }
+

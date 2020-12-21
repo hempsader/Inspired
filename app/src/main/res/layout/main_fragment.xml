@@ -12,12 +12,16 @@
 
     <TextView
         android:id="@+id/quote_text"
-        android:layout_width="300dp"
-        android:layout_height="400dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+
+        android:layout_marginBottom="100dp"
         android:fontFamily="@font/amita"
         android:textSize="26dp"
         app:autoSizeTextType="uniform"
-
         app:layout_constraintBottom_toTopOf="@+id/inspireMe"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.489"
@@ -29,15 +33,16 @@
         android:id="@+id/inspireMe"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="248dp"
         android:fontFamily="@font/arapey_italic"
         android:text="Inspire Me.."
         android:textColor="@color/design_default_color_primary"
         android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+        app:layout_constraintTop_toBottomOf="@+id/progressBar"
+        app:layout_constraintVertical_bias="0.79" />
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -66,11 +71,14 @@
         android:id="@+id/favouriteImage"
         android:layout_width="60dp"
         android:layout_height="60dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/inspireMe"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/quote_text"
-        app:layout_constraintVertical_bias="0.558"
+        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/ic_outline_favorite_border_24_false" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,6 +10,7 @@ import android.os.Build
 import android.system.Os
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.LifecycleCoroutineScope
 import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
@@ -20,13 +21,13 @@ import kotlin.coroutines.CoroutineContext
 class InternetUtil(private val context: Context) {
     companion object {
         @RequiresApi(Build.VERSION_CODES.N)
-        fun checkInternet(context: Context, coroutineContext: CoroutineContext) =
+        fun checkInternet(context: Context, lifecycleCoroutineScope: LifecycleCoroutineScope) =
             callbackFlow {
                 val manager =
                     context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
                 val state =
                     manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!
-                launch(coroutineContext) {
+                lifecycleCoroutineScope.launch(coroutineContext) {
                     when (state) {
                         true -> {
                             send(State.CONNECTED)
@@ -40,25 +41,25 @@ class InternetUtil(private val context: Context) {
                 manager.registerDefaultNetworkCallback(object :
                     ConnectivityManager.NetworkCallback() {
                     override fun onAvailable(network: Network) {
-                        launch(coroutineContext) {
+                        lifecycleCoroutineScope.launch(coroutineContext) {
                             send(State.CONNECTED)
                         }
                     }
 
                     override fun onLosing(network: Network, maxMsToLive: Int) {
-                        launch(coroutineContext) {
+                        lifecycleCoroutineScope.launch(coroutineContext) {
                             send(State.DISSCONNECTED)
                         }
                     }
 
                     override fun onUnavailable() {
-                        launch(coroutineContext) {
+                        lifecycleCoroutineScope.launch(coroutineContext) {
                             send(State.DISSCONNECTED)
                         }
                     }
 
                     override fun onLost(network: Network) {
-                        launch(coroutineContext) {
+                        lifecycleCoroutineScope.launch(coroutineContext) {
                             send(State.DISSCONNECTED)
                         }
                     }

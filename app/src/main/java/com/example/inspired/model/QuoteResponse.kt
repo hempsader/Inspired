@@ -9,8 +9,7 @@ data class QuoteResponse(@SerializedName("data") val quote: List<Quote>) {
 
     @Entity(tableName = "quote_db")
     data class Quote(
-        @PrimaryKey(autoGenerate = true)
-        val idRoom: Int,
+        @PrimaryKey
         @SerializedName("_id") val id: String,
         @SerializedName("quoteText") val text: String,
         @SerializedName("quoteAuthor") val author: String,

@@ -1,28 +1,20 @@
 package com.example.inspired.viewModel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.util.Log
+import androidx.lifecycle.*
 import com.example.inspired.model.QuoteResponse
 import com.example.inspired.repository.QuoteRepository
 import com.example.inspired.repository.QuoteRepositoryImpl
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 class QuoteFavouriteViewModel(private val repository: QuoteRepositoryImpl, private val coroutineScope: CoroutineContext) : ViewModel(){
-    private val favouriteMutableLiveData = MutableLiveData<List<QuoteResponse.Quote>>()
+     val favouriteMutableLiveData: LiveData<List<QuoteResponse.Quote>>
+                get() = repository.getFavourites().flowOn(Dispatchers.Main)
+                    .asLiveData(context = viewModelScope.coroutineContext)
 
-
-    init {
-        GlobalScope.launch(context = coroutineScope) {
-            repository.getFavourites()?.asFlow()?.collect {
-
-            }
-        }
-    }
-
-    fun favouriteQuotes(): LiveData<List<QuoteResponse.Quote>> = favouriteMutableLiveData
 }

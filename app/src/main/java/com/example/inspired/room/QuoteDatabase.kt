@@ -6,17 +6,18 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.inspired.model.QuoteResponse
 
-@Database(entities = [QuoteResponse.Quote::class], version = 4)
+@Database(entities = [QuoteResponse.Quote::class], version = 18)
 abstract class QuoteDatabase : RoomDatabase(){
     abstract fun quoteDao(): QuoteDao
 
     companion object{
         private var INSTANCE: QuoteDatabase? = null
-
         fun instance(context: Context): QuoteDatabase? {
             synchronized(Any()){
-                val db = Room.databaseBuilder(context,QuoteDatabase::class.java,"quote_db").fallbackToDestructiveMigration().build()
-                INSTANCE = db
+                if(INSTANCE == null) {
+                    val db = Room.databaseBuilder(context,QuoteDatabase::class.java,"quote_db").fallbackToDestructiveMigration().build()
+                    INSTANCE = db
+                }
             }
             return INSTANCE
         }

@@ -22,9 +22,10 @@
                 android:id="@+id/author_favourite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="8dp"
                 android:text="TextView"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.09"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -32,7 +33,6 @@
                 android:id="@+id/text_favourite"
                 android:layout_width="222dp"
                 android:layout_height="59dp"
-                android:layout_marginStart="24dp"
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="8dp"
                 android:ellipsize="end"
@@ -40,7 +40,8 @@
                 android:singleLine="true"
                 android:text="TextView"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/author_favourite"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="1.0" />
 
@@ -50,9 +51,12 @@
                 android:layout_height="40dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.434"
                 app:layout_constraintStart_toEndOf="@+id/text_favourite"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.457"
                 app:srcCompat="@drawable/ic_baseline_favorite_24_true" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,18 +11,19 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.inspired.model.QuoteResponse
 import com.example.inspired.repository.QuoteRepositoryImpl
-import com.example.inspired.util.InternetUtil
-import com.example.inspired.util.ResponseQuoteRandom
-import com.example.inspired.util.State
-import com.example.inspired.util.UtilPreferences
+import com.example.inspired.util.*
 import com.example.inspired.viewModel.QuoteViewModel
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.favourite_list.*
 import kotlinx.android.synthetic.main.main_fragment.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -35,7 +36,7 @@ class FragmentRandom : Fragment(){
     private var job: Job? = null
     private val broadcast = BroadCastInsternet()
     private val channel = ConflatedBroadcastChannel<State>()
-
+    private lateinit var inspireMeButton: TextView
     private val viewModel by lazy {
         ViewModelProvider(this, object: ViewModelProvider.Factory{
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -50,24 +51,39 @@ class FragmentRandom : Fragment(){
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.main_fragment,container,false)
-
+        inspireMeButton = view.findViewById(R.id.inspireMe)
 
 
         viewModel.observeRemoteQuote().observe(viewLifecycleOwner, Observer {
-            if(it is ResponseQuoteRandom.ResponseSuccesfull ){
-                if(it.quote?.text != null) {
-                    favourite(it.quote)
-                    if(it.quote.favourite) favouriteImage.setImageResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImage.setImageResource(R.drawable.ic_outline_favorite_border_24_false)
+            if(it is ResponseQuoteRandom.ResponseSuccesfull ) {
+                if (it.quote != null) {
                     progressBar.visibility = View.GONE
                     quote_text.text = it.quote?.text
                     author.text = it.quote?.author
+                    viewModel.insertOfflineQuote(it.quote)
+                    favouriteImage.visibility = View.VISIBLE
                 }
-                viewModel.insertOfflineQuote(it.quote)
+                    favourite(it.quote!!)
+                    if (it.quote?.favourite!!) favouriteImage.setImageResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImage.setImageResource(
+                        R.drawable.ic_outline_favorite_border_24_false
+                    )
+
+            }
+            if(it is ResponseQuoteRandom.ResponseUnsuccessfull){
+                Snackbar.make(view, it.string, Snackbar.LENGTH_SHORT).show()
+                viewModel.fetchLocalQuote()
+            }
+        })
+
+        viewModel.test().observe(viewLifecycleOwner, Observer {
+            it.forEach {
+                Log.d("aa", it.author + " " + it.favourite.toString())
             }
         })
 
         viewModel.observerLocalQuote().observe(viewLifecycleOwner, Observer {
             if(it != null) {
+                favouriteImage.visibility = View.VISIBLE
                 favourite(it)
                 if(it.favourite) favouriteImage.setImageResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImage.setImageResource(R.drawable.ic_outline_favorite_border_24_false)
                 progressBar.visibility = View.GONE
@@ -103,7 +119,7 @@ class FragmentRandom : Fragment(){
 
 
     private fun fetching(){
-        job  =   GlobalScope.launch(Dispatchers.IO) {
+        job  =   viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             channel.asFlow().collectLatest {
                 if(it == State.CONNECTED){
                     withContext(Dispatchers.Main) {
@@ -126,15 +142,16 @@ class FragmentRandom : Fragment(){
     }
 
     private fun fetchingClick(){
-        job  =   GlobalScope.launch(Dispatchers.Main) {
+        job  =   viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             channel.asFlow().collectLatest { state ->
-                inspireMe.setOnClickListener {
+                inspireMeButton.setOnClickListener {
                     GlobalScope.launch(Dispatchers.IO) {
                             if (state == State.CONNECTED) {
                                 withContext(Dispatchers.Main) {
                                 quote_text.text = ""
                                     author.text = ""
                                 progressBar.visibility = View.VISIBLE
+                                    favouriteImage.visibility = View.GONE
                             }
                             viewModel.fetchQuoteRemote()
                         }
@@ -143,6 +160,7 @@ class FragmentRandom : Fragment(){
                                 quote_text.text = ""
                                 author.text = ""
                                 progressBar.visibility = View.VISIBLE
+                                favouriteImage.visibility = View.GONE
                             }
                             viewModel.fetchLocalQuote()
                         }
@@ -153,14 +171,14 @@ class FragmentRandom : Fragment(){
     }
     private fun internetCheck(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            job = GlobalScope.launch(Dispatchers.Unconfined) {
-                InternetUtil.checkInternet(requireContext(), Dispatchers.IO)
+            job = viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Unconfined) {
+                InternetUtil.checkInternet(requireContext(), viewLifecycleOwner.lifecycleScope)
                     .collect {
                         channel.send(it)
                     }
             }
         } else {
-            context?.registerReceiver(
+            requireContext()?.registerReceiver(
                 broadcast,
                 IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
             )
@@ -169,14 +187,15 @@ class FragmentRandom : Fragment(){
 
     inner  class BroadCastInsternet: BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            when (context?.let { InternetUtil.checkInternetBroadcast(it)}) {
+            when (requireContext()?.let { InternetUtil.checkInternetBroadcast(it)}) {
+
                 State.CONNECTED -> {
-                    GlobalScope.launch(Dispatchers.IO) {
+                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                         channel.send(State.CONNECTED)
                     }
                 }
                 State.DISSCONNECTED -> {
-                    GlobalScope.launch(Dispatchers.IO) {
+                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                         channel.send(State.DISSCONNECTED)
                     }
                 }
