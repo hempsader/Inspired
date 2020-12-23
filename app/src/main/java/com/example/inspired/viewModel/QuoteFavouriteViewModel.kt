@@ -17,4 +17,10 @@ class QuoteFavouriteViewModel(private val repository: QuoteRepositoryImpl, priva
                 get() = repository.getFavourites().flowOn(Dispatchers.Main)
                     .asLiveData(context = viewModelScope.coroutineContext)
 
+
+    fun  favouriteUpdate(quote: QuoteResponse.Quote){
+        viewModelScope.launch(context = coroutineScope) {
+            repository.updateQuote(quote)
+        }
+    }
 }

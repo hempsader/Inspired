@@ -1,31 +1,14 @@
-package com.example.inspired
+package com.example.inspired.view
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import androidx.appcompat.app.ActionBar
+import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.*
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
-import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
-import androidx.viewpager2.adapter.FragmentStateAdapter
-import androidx.viewpager2.widget.ViewPager2
-import com.example.inspired.repository.QuoteRepositoryImpl
-import com.example.inspired.util.ResponseQuoteRandom
-import com.example.inspired.util.State
-import com.example.inspired.viewModel.QuoteViewModel
+import com.example.inspired.R
 import com.google.android.material.tabs.TabLayout
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.main_fragment.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlin.concurrent.fixedRateTimer
-import kotlin.coroutines.CoroutineContext
 
 
 class MainActivity : AppCompatActivity() {
@@ -55,6 +38,18 @@ class MainActivity : AppCompatActivity() {
         setupTabs()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val view = menuInflater.inflate(R.menu.menu,menu)
+        val settings = menu?.findItem(R.id.settings)
+        settings?.setOnMenuItemClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+             true
+        }
+        return true
+    }
+
+
+
     override fun onBackPressed() {
         if (viewPager.currentItem == 0) {
             // If the user is currently looking at the first step, allow the system to handle the
@@ -83,6 +78,8 @@ class MainActivity : AppCompatActivity() {
         tabLayout.setupWithViewPager(viewPager)
         tabLayout.getTabAt(0)?.setText("Random")
         tabLayout.getTabAt(1)?.setText("Favourite")
+        tabLayout.getTabAt(1)?.setIcon(R.drawable.ic_outline_favorite_border_24_false)
+        tabLayout.getTabAt(0)?.setIcon(R.drawable.ic_outline_transform_24)
     }
 }
 

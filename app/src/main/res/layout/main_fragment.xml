@@ -7,7 +7,7 @@
     android:id="@+id/mainLayout"
     android:layout_marginStart="32dp"
     android:layout_marginEnd="32dp"
-    tools:context=".MainActivity">
+    tools:context=".view.MainActivity">
 
 
     <TextView
@@ -18,16 +18,16 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
 
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="150dp"
         android:fontFamily="@font/amita"
         android:textSize="26dp"
         app:autoSizeTextType="uniform"
         app:layout_constraintBottom_toTopOf="@+id/inspireMe"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.489"
+        app:layout_constraintHorizontal_bias="0.400"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.39" />
+        app:layout_constraintVertical_bias="0.26999998" />
 
     <TextView
         android:id="@+id/inspireMe"
@@ -63,9 +63,10 @@
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@+id/inspireMe"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.973"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/quote_text" />
+        app:layout_constraintTop_toBottomOf="@+id/quote_text"
+        app:layout_constraintVertical_bias="0.261" />
 
     <ImageView
         android:id="@+id/favouriteImage"
@@ -75,10 +76,22 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/inspireMe"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.222"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/quote_text"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_bias="0.81"
         app:srcCompat="@drawable/ic_outline_favorite_border_24_false" />
+
+    <ImageView
+        android:id="@+id/imageShare"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="40dp"
+        app:layout_constraintBottom_toTopOf="@+id/inspireMe"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/favouriteImage"
+        app:layout_constraintTop_toBottomOf="@+id/quote_text"
+        app:layout_constraintVertical_bias="0.755"
+        app:srcCompat="@drawable/ic_baseline_share_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

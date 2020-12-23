@@ -16,18 +16,13 @@ import kotlin.coroutines.coroutineContext
 
 class QuoteViewModel(private val repository: QuoteRepositoryImpl,private val coroutineScope: CoroutineContext): ViewModel(){
     private val quoteMutableData = MutableLiveData<ResponseQuoteRandom>()
-    private val quoteLocalMutableData = MutableLiveData<QuoteResponse.Quote>()
-    private val quoteFetchTest = MutableLiveData<List<QuoteResponse.Quote>>()
+    private val quoteLocalMutableData = MutableLiveData<ResponseQuoteRandom>()
 
 
     fun observeRemoteQuote(): LiveData<ResponseQuoteRandom> = quoteMutableData
-    fun observerLocalQuote(): LiveData<QuoteResponse.Quote> = quoteLocalMutableData
-    fun test(): LiveData<List<QuoteResponse.Quote>> = quoteFetchTest
+    fun observerLocalQuote(): LiveData<ResponseQuoteRandom> = quoteLocalMutableData
 
-    init {
-        fetchTest()
 
-    }
 
 
     fun fetchQuoteRemote(){
@@ -44,22 +39,19 @@ class QuoteViewModel(private val repository: QuoteRepositoryImpl,private val cor
                     )
                 }
             } catch (e: Exception) {
-                quoteMutableData.postValue(ResponseQuoteRandom.ResponseUnsuccessfull(e.stackTraceToString()))
+                quoteMutableData.postValue(ResponseQuoteRandom.ResponseUnsuccessfull(e.stackTrace.toString()))
             }
         }
     }
 
-    private fun fetchTest(){
-        viewModelScope.launch(context = coroutineScope) {
-            repository.fetchAll().collect {
-                quoteFetchTest.postValue(it)
-            }
-        }
-    }
 
     fun fetchLocalQuote() {
         viewModelScope.launch(context = coroutineScope) {
-            quoteLocalMutableData.postValue(repository.getQuoteRandomFromDb()?.random())
+            if(repository.getQuoteRandomFromDb()?.size!! > 0 ) {
+                quoteLocalMutableData.postValue(ResponseQuoteRandom.ResponseSuccesfull(repository.getQuoteRandomFromDb()?.random()))
+            }else{
+                quoteLocalMutableData.postValue(ResponseQuoteRandom.ResponseUnsuccessfull("No Quotes Catched!"))
+            }
         }
     }
 

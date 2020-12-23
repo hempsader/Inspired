@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.example.inspired.R
@@ -39,6 +40,11 @@ class DialogFavourite: DialogFragment(){
 
         val dialogText = view.findViewById<TextView>(R.id.dialog_text)
         val dialogAuthor = view.findViewById<TextView>(R.id.dialog_author)
+        view.findViewById<ImageButton>(R.id.imageButton_share).apply {
+            setOnClickListener {
+                quote?.let { ShareQuote(requireContext()).quote(it) }
+            }
+        }
         view.findViewById<Button>(R.id.button_dismiss).apply {
             setOnClickListener {
                 dialog?.dismiss()

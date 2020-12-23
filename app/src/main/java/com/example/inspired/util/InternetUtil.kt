@@ -7,78 +7,116 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.os.Build
-import android.system.Os
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LifecycleCoroutineScope
-import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.*
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.flow.internal.ChannelFlow
-import kotlin.coroutines.CoroutineContext
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 
-class InternetUtil(private val context: Context) {
+class InternetUtil {
     companion object {
-        @RequiresApi(Build.VERSION_CODES.N)
-        fun checkInternet(context: Context, lifecycleCoroutineScope: LifecycleCoroutineScope) =
-            callbackFlow {
-                val manager =
-                    context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                val state =
-                    manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!
-                lifecycleCoroutineScope.launch(coroutineContext) {
-                    when (state) {
-                        true -> {
-                            send(State.CONNECTED)
-                        }
-                        else -> {
-                            send(State.DISSCONNECTED)
-                        }
-                    }
-                }
+        @ExperimentalCoroutinesApi
+        private val flow = ConflatedBroadcastChannel<State>()
+        private fun initialiseConnectivity(context: Context): Boolean {
+            val manager =
+                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            return manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!
+        }
+        private var context: Context? = null
+        private var coroutineScope: CoroutineScope? = null
 
-                manager.registerDefaultNetworkCallback(object :
-                    ConnectivityManager.NetworkCallback() {
-                    override fun onAvailable(network: Network) {
-                        lifecycleCoroutineScope.launch(coroutineContext) {
-                            send(State.CONNECTED)
+        private object broadcast: BroadcastReceiver() {
+            @ExperimentalCoroutinesApi
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (context != null) {
+                    when (checkInternetBroadcast(context)) {
+                        State.CONNECTED -> {
+                            coroutineScope?.launch(Dispatchers.IO) {
+                                flow.send(State.CONNECTED)
+                            }
                         }
-                    }
-
-                    override fun onLosing(network: Network, maxMsToLive: Int) {
-                        lifecycleCoroutineScope.launch(coroutineContext) {
-                            send(State.DISSCONNECTED)
+                        State.DISSCONNECTED -> {
+                            coroutineScope?.launch(Dispatchers.IO) {
+                                flow.send(State.DISSCONNECTED)
+                            }
                         }
-                    }
-
-                    override fun onUnavailable() {
-                        lifecycleCoroutineScope.launch(coroutineContext) {
-                            send(State.DISSCONNECTED)
-                        }
-                    }
-
-                    override fun onLost(network: Network) {
-                        lifecycleCoroutineScope.launch(coroutineContext) {
-                            send(State.DISSCONNECTED)
-                        }
-                    }
-                })
-                awaitClose {
-                    if (isClosedForSend == false) {
-                        close()
                     }
                 }
             }
+        }
+
+        fun initialise(context: Context, coroutineScope: CoroutineScope): InternetUtil? {
+            var internetUtil: InternetUtil? = null
+            this.context = context
+            this.coroutineScope = coroutineScope
+            synchronized(Any()){
+                if (internetUtil == null){
+                    val net = InternetUtil()
+                    internetUtil = net
+                }else{
+                    return internetUtil
+                }
+            }
+            checking(Companion.context!!, Companion.coroutineScope!!)
+            return internetUtil
+        }
 
 
-        fun checkInternetBroadcast(context: Context): State {
+        fun registerBroadCast() {
+            if (Build.VERSION.SDK_INT < 24) {
+                context?.registerReceiver(
+                    broadcast,
+                    IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+                )
+            }
+        }
+
+
+
+        @InternalCoroutinesApi
+        fun getState(): Flow<State> {
+            return flow.asFlow()
+        }
+
+        private fun checking(context: Context, coroutineScope: CoroutineScope) {
+            if (Build.VERSION.SDK_INT >= 24) {
+                checkInternetFlow(context, coroutineScope!!)
+            }
+            if (Build.VERSION.SDK_INT < 24) {
+                checkInternetBroadcast(context)
+            }
+        }
+
+        //Api >= 24
+        @RequiresApi(Build.VERSION_CODES.N)
+        private fun checkInternetFlow(
+            context: Context,
+            coroutineScope: CoroutineScope
+        ) {
             val manager =
                 context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val isOnline =
-                manager.activeNetworkInfo != null && manager.activeNetworkInfo!!.isConnected
-            return if (isOnline) State.CONNECTED else State.DISSCONNECTED
+            manager.registerDefaultNetworkCallback(object :
+                ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    coroutineScope.launch(Dispatchers.IO) {
+                        flow.send(State.CONNECTED)
+                    }
+                }
+
+                override fun onLost(network: Network) {
+                    coroutineScope.launch(Dispatchers.IO) {
+                        flow.send(State.DISSCONNECTED)
+                    }
+                }
+            })
         }
+
+        //Api <24
+        private fun checkInternetBroadcast(context: Context): State {
+            return if (initialiseConnectivity(context)) State.CONNECTED else State.DISSCONNECTED
+        }
+
 
     }
 }

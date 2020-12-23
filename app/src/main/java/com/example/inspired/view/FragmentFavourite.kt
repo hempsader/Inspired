@@ -1,7 +1,6 @@
-package com.example.inspired
+package com.example.inspired.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,17 +8,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.inspired.R
 import com.example.inspired.model.QuoteResponse
 import com.example.inspired.repository.QuoteRepositoryImpl
 import com.example.inspired.util.DialogFavourite
 import com.example.inspired.viewModel.QuoteFavouriteViewModel
-import kotlinx.android.synthetic.main.fragment_favourite.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
-class FragmentFavourite : Fragment(), ClickedQuote{
+class FragmentFavourite : Fragment(), ClickedQuote,
+    ClickFavourite {
     private val dialog = DialogFavourite()
     private val viewModel by lazy {
         ViewModelProvider(this, object: ViewModelProvider.Factory{
@@ -28,7 +30,8 @@ class FragmentFavourite : Fragment(), ClickedQuote{
             }
         })[QuoteFavouriteViewModel::class.java]
     }
-    private val adapterFavourites = FavouriteList(this)
+    private val adapterFavourites =
+        FavouriteList(this, this)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,7 +60,14 @@ class FragmentFavourite : Fragment(), ClickedQuote{
     }
 
     override fun sendQuote(quote: QuoteResponse.Quote) {
-        dialog.quote(quote)
-        dialog.show(childFragmentManager,"tag")
+        lifecycleScope.launch(Dispatchers.Main) {
+            dialog.quote(quote)
+            dialog.show(childFragmentManager, "tag")
+        }
+    }
+
+    override fun sendQuoteFavourite(quote: QuoteResponse.Quote) {
+        quote.favourite = !quote.favourite
+        viewModel.favouriteUpdate(quote)
     }
 }

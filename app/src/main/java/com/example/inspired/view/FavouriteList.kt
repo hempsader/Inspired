@@ -1,18 +1,15 @@
-package com.example.inspired
+package com.example.inspired.view
 
-import android.app.AlertDialog
-import android.app.Dialog
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
+import com.example.inspired.R
 import com.example.inspired.model.QuoteResponse
 
-class FavouriteList(private val clickedQuote: ClickedQuote) : RecyclerView.Adapter<FavouriteList.FavouriteHolder>(){
+class FavouriteList(private val clickedQuote: ClickedQuote, private val clickFavourite: ClickFavourite) : RecyclerView.Adapter<FavouriteList.FavouriteHolder>(){
         private var listQuotes = ArrayList<QuoteResponse.Quote>()
 
 
@@ -23,15 +20,20 @@ class FavouriteList(private val clickedQuote: ClickedQuote) : RecyclerView.Adapt
 
    inner class FavouriteHolder(itemView: View): RecyclerView.ViewHolder(itemView), View.OnClickListener {
         private var clicked: ClickedQuote = clickedQuote
+       private var clickedFavourite: ClickFavourite = clickFavourite
        private var text: TextView
         private var favourite: ImageView
         private var author: TextView
 
         init {
-            itemView.setOnClickListener(this)
             text = itemView.findViewById(R.id.text_favourite)
+            text.setOnClickListener(this)
             favourite = itemView.findViewById(R.id.imageView_favourite)
+            favourite.setOnClickListener {
+                clickedFavourite.sendQuoteFavourite(listQuotes[adapterPosition])
+            }
             author = itemView.findViewById(R.id.author_favourite)
+            author.setOnClickListener(this)
         }
 
         fun setup(quote: QuoteResponse.Quote){
@@ -43,8 +45,6 @@ class FavouriteList(private val clickedQuote: ClickedQuote) : RecyclerView.Adapt
         override fun onClick(v: View?) {
             clicked.sendQuote(listQuotes[adapterPosition])
         }
-
-
     }
 
     override fun onCreateViewHolder(
@@ -64,6 +64,10 @@ class FavouriteList(private val clickedQuote: ClickedQuote) : RecyclerView.Adapt
 
 interface ClickedQuote{
     fun sendQuote(quote: QuoteResponse.Quote)
+}
+
+interface ClickFavourite{
+    fun sendQuoteFavourite(quote: QuoteResponse.Quote)
 }
 
 
