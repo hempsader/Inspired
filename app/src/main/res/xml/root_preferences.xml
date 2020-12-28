@@ -9,17 +9,18 @@
         app:key="colors"
         app:title="Each quote have different color" />
 
-    <PreferenceCategory android:title="Daily Quote">
+    <PreferenceCategory
+        android:title="Daily Quote">
 
         <SwitchPreferenceCompat
             app:key="daily_quote"
             app:summaryOff="Daily quote OFF"
             app:summaryOn="Daily quote ON"
             app:title="Daily Quote" />
-        <ListPreference
-            app:entries="@array/hour_entries"
-            app:entryValues="@array/hour_values"
-            app:key="daily"
-            app:title="Notification hour" />
+        <Preference
+            app:key="hour"
+            android:title="Select Notification Hour">
+
+        </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -5,14 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
@@ -32,7 +36,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.toList
 
-class FragmentRandom : Fragment() {
+class FragmentRandom : VisibleFragment() {
     private lateinit var inspireMeButton: TextView
     private lateinit var shareImage: ImageView
     private val viewModel by lazy {
@@ -46,8 +50,19 @@ class FragmentRandom : Fragment() {
         })[QuoteViewModel::class.java]
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
+    override fun onStart() {
+        UtilPreferences.openAppNotifSet(requireContext(),true)
+        super.onStart()
+    }
+
+    override fun onStop() {
+        UtilPreferences.openAppNotifSet(requireContext(), false)
+        super.onStop()
+    }
+
+    override fun onResume() {
+        UtilPreferences.openAppNotifSet(requireContext(),true)
+        super.onResume()
     }
 
     @InternalCoroutinesApi
@@ -56,6 +71,7 @@ class FragmentRandom : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        batterySaverIgnore()
         val view = inflater.inflate(R.layout.main_fragment, container, false)
         inspireMeButton = view.findViewById(R.id.inspireMe)
         shareImage = view.findViewById(R.id.imageShare)
@@ -99,14 +115,29 @@ class FragmentRandom : Fragment() {
         })
         //fetchingClick()
 
-        FetchFragment().fetchQuoteFragment()
+        firstTimeFetch()
+        fetchclick()
         return view
+    }
+
+    private fun batterySaverIgnore(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent()
+            val packageName = context?.packageName
+            val pm = context?.getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+        }
     }
 
     private fun uiCheck(quote: QuoteResponse.Quote) {
         if (quote != null) {
             favouriteImage.visibility = View.VISIBLE
             shareImage.visibility = View.VISIBLE
+            inspireMeButton.visibility = View.VISIBLE
             progressBar.visibility = View.GONE
             quote_text.text = quote.text
             author.text = quote.author
@@ -119,10 +150,10 @@ class FragmentRandom : Fragment() {
             if (quote.favourite) favouriteImage.setImageResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImage.setImageResource(
                 R.drawable.ic_outline_favorite_border_24_false
             )
+            viewModel.insertOfflineQuote(quote)
             viewModel.favouriteQuote(quote)
         }
     }
-
 
 
     private fun shareQuote(quote: QuoteResponse.Quote) {
@@ -136,49 +167,49 @@ class FragmentRandom : Fragment() {
         Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
     }
 
-    private fun loadingQuoteUI(){
-               quote_text.text = ""
-               author.text = ""
-               progressBar.visibility = View.VISIBLE
+    private fun loadingQuoteUI() {
+        quote_text.text = ""
+        author.text = ""
+        progressBar.visibility = View.VISIBLE
+        inspireMeButton.visibility = View.INVISIBLE
+        shareImage.visibility = View.INVISIBLE
+        favouriteImage.visibility = View.INVISIBLE
     }
-            inner class FetchFragment(){
-                @InternalCoroutinesApi
-                fun fetchQuoteFragment(){
-                    viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                        InternetUtil.getState().collectLatest {
-                            when (it){
-                                State.CONNECTED -> {
-                                    loadingQuoteUI()
-                                    viewModel.fetchQuoteRemote()
-                                }
-                                State.DISSCONNECTED -> {
-                                    loadingQuoteUI()
-                                    viewModel.fetchLocalQuote()
-                                }
-                            }
-                        }
-                    }
-                    }
+
+    private fun firstTimeFetch(){
+        val manager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        when(manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!){
+            true -> {
+                viewModel.fetchQuoteRemote()
             }
-            inner class FetchOutsite(){
-                    @InternalCoroutinesApi
-                    fun fetchQuoteFragment(){
-                        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-                            InternetUtil.getState().collectLatest {
-                                when (it){
-                                    State.CONNECTED -> {
-                                        viewModel.fetchQuoteRemote()
-                                    }
-                                    State.DISSCONNECTED -> {
-                                        viewModel.fetchLocalQuote()
-                                    }
-                                }
-                            }
+            false -> {
+                viewModel.fetchLocalQuote()
+            }
+        }
+    }
+
+    @InternalCoroutinesApi
+    private fun fetchclick() {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            InternetUtil.getState().collectLatest {state ->
+                inspireMeButton.setOnClickListener {
+                    when (state) {
+                        State.CONNECTED -> {
+                            loadingQuoteUI()
+                            viewModel.fetchQuoteRemote()
                         }
+                        State.DISSCONNECTED -> {
+                            loadingQuoteUI()
+                            viewModel.fetchLocalQuote()
+                        }
+                    }
                 }
             }
-
+        }
+    }
 }
+
+
 
 
 

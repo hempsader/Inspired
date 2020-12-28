@@ -62,7 +62,7 @@ class QuoteViewModel(private val repository: QuoteRepositoryImpl,private val cor
     }
 
     fun favouriteQuote(quote: QuoteResponse.Quote?){
-        viewModelScope.launch(context = coroutineScope) {
+        viewModelScope.launch() {
             repository.updateQuote(quote!!)
         }
     }

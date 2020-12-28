@@ -1,6 +1,7 @@
 package com.example.inspired.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-class FragmentFavourite : Fragment(), ClickedQuote,
+class FragmentFavourite : VisibleFragment(), ClickedQuote,
     ClickFavourite {
     private val dialog = DialogFavourite()
     private val viewModel by lazy {
@@ -46,9 +47,6 @@ class FragmentFavourite : Fragment(), ClickedQuote,
         }
         recycler.adapter = adapterFavourites
 
-
-
-
         return view
     }
 
@@ -60,7 +58,7 @@ class FragmentFavourite : Fragment(), ClickedQuote,
     }
 
     override fun sendQuote(quote: QuoteResponse.Quote) {
-        lifecycleScope.launch(Dispatchers.Main) {
+        if (quote != null) {
             dialog.quote(quote)
             dialog.show(childFragmentManager, "tag")
         }

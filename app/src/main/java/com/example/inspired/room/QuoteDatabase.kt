@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.inspired.model.QuoteResponse
 
-@Database(entities = [QuoteResponse.Quote::class], version = 24)
+@Database(entities = [QuoteResponse.Quote::class], version = 27)
 abstract class QuoteDatabase : RoomDatabase(){
     abstract fun quoteDao(): QuoteDao
 

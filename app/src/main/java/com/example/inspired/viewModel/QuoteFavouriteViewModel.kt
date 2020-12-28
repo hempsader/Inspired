@@ -15,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
 class QuoteFavouriteViewModel(private val repository: QuoteRepositoryImpl, private val coroutineScope: CoroutineContext) : ViewModel(){
      val favouriteMutableLiveData: LiveData<List<QuoteResponse.Quote>>
                 get() = repository.getFavourites().flowOn(Dispatchers.Main)
-                    .asLiveData(context = viewModelScope.coroutineContext)
+                    .asLiveData()
 
 
     fun  favouriteUpdate(quote: QuoteResponse.Quote){

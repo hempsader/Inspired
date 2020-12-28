@@ -4,10 +4,12 @@ import android.app.Notification
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.work.CoroutineWorker
-import androidx.work.WorkerParameters
+import androidx.work.*
 import com.example.inspired.model.QuoteResponse
 import com.example.inspired.repository.QuoteRepositoryImpl
 import com.example.inspired.util.InternetUtil
@@ -17,23 +19,28 @@ import com.example.inspired.view.NOTIFICATION_CHANNEL_ID
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
 
-class Fetching(private val context: Context, private val params: WorkerParameters): CoroutineWorker(context,params) {
+class FetchingFirstTime(private val context: Context, private val workerParameters: WorkerParameters): CoroutineWorker(context,workerParameters) {
+    @RequiresApi(Build.VERSION_CODES.O)
     @InternalCoroutinesApi
     override suspend fun doWork(): Result {
         try {
                 fetchQuote()
-                return Result.success()
+                NotificationWorkStart.startPeriodic(applicationContext)
+               return Result.success()
+
         }catch (e: Exception){
             if(runAttemptCount > 3){
                 return Result.failure()
             }
         }finally {
-            NotificationWorkStart.start(applicationContext, UtilPreferences.dailyHour(applicationContext), UtilPreferences.dailyMinute(applicationContext))
+                NotificationWorkStart.start(applicationContext, UtilPreferences.dailyHour(applicationContext), UtilPreferences.dailyMinute(applicationContext))
         }
+        NotificationWorkStart.startPeriodic(applicationContext)
         return Result.success()
     }
+
     @InternalCoroutinesApi
-    private fun fetchQuote() {
+    private fun fetchQuote(){
         val coroutineScope = CoroutineScope(Job() + Dispatchers.IO)
         val repository = QuoteRepositoryImpl(context)
         when (checkInternet()) {
@@ -70,38 +77,26 @@ class Fetching(private val context: Context, private val params: WorkerParameter
                 }
             }
         }
-    }
+        }
+
     private fun checkInternet(): Boolean{
         val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         return manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!
     }
-    private fun notif(quote: QuoteResponse.Quote){
-        val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-            .setTicker("Inspire You")
-            .setSmallIcon(android.R.drawable.ic_menu_report_image)
-            .setContentTitle(quote.author)
-            .setContentText(quote.text)
-            .setStyle(
-                NotificationCompat.BigTextStyle()
-                .bigText(quote.text))
-            .setAutoCancel(true)
-            .build()
-        val notifManager = NotificationManagerCompat.from(context)
-        notifManager.notify(0, notification)
-    }
+
 
     private fun broadcastSentQuote(requestCode: Int, notification: Notification){
-        val intent = Intent(FetchingFirstTime.ACTION_SHOW_NOTIFICATION).apply {
-            putExtra(FetchingFirstTime.REQUEST_CODE, requestCode)
-            putExtra(FetchingFirstTime.QUOTE, notification)
+        val intent = Intent(ACTION_SHOW_NOTIFICATION).apply {
+            putExtra(REQUEST_CODE, requestCode)
+            putExtra(QUOTE, notification)
         }
-        applicationContext.sendOrderedBroadcast(intent, FetchingFirstTime.PERM_PRIVATE)
+        applicationContext.sendOrderedBroadcast(intent, PERM_PRIVATE)
     }
 
-    companion object{
-        const val ACTION_SHOW_NOTIFICATION = "com.example.inspired.SHOW_NOTIFICATION"
-        const val PERM_PRIVATE = "com.example.inspired.PRIVATE"
-        const val REQUEST_CODE = "REQUEST_CODE"
-        const val QUOTE = "QUOTE"
+        companion object{
+            const val ACTION_SHOW_NOTIFICATION = "com.example.inspired.SHOW_NOTIFICATION"
+            const val PERM_PRIVATE = "com.example.inspired.PRIVATE"
+            const val REQUEST_CODE = "REQUEST_CODE"
+            const val QUOTE = "QUOTE"
     }
 }

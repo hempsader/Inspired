@@ -4,34 +4,60 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.work.*
-import com.example.inspired.model.QuoteResponse
-import com.example.inspired.repository.QuoteRepositoryImpl
+import android.os.PowerManager
+import android.provider.Settings
+import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.work.WorkManager
 import com.example.inspired.util.InternetUtil
-import com.example.inspired.viewModel.QuoteViewModel
-import com.example.inspired.viewModel.fetching.Fetching
-import kotlinx.coroutines.*
-import java.util.*
-import java.util.concurrent.TimeUnit
+import com.example.inspired.util.UtilPreferences
+import com.example.inspired.viewModel.fetching.NotificationWorkStart
+import com.judemanutd.autostarter.AutoStartPermissionHelper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlin.random.Random
+
 
 const val NOTIFICATION_CHANNEL_ID = "quote"
 
 class GlobalApp : Application() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
-        val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+       val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         InternetUtil.initialise(applicationContext, applicationScope)
         InternetUtil.registerBroadCast()
+        if( AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(applicationContext)){
+            if(AutoStartPermissionHelper.getInstance().getAutoStartPermission(applicationContext)){
+                Log.d("dd", "success")
+            }else{
+                Log.d("dd", "failure")
+            }
+        }else{
+            Log.d("dd", "bad")
+        }
+        if(UtilPreferences.scheduleNewWork(applicationContext)) {
+            UtilPreferences.dailyMinuteSet(applicationContext,0)
+            val randomHour = Random.nextInt(8, 20)
+            UtilPreferences.dailyHourSet(applicationContext, randomHour)
+            UtilPreferences.scheduleNewWorkSet(applicationContext, false)
+            if(UtilPreferences.dailyEnable(applicationContext)) {
+                Log.d("dd", "asdasda")
+                NotificationWorkStart.cancelOneTime(applicationContext)
+                NotificationWorkStart.start(
+                    applicationContext,
+                    UtilPreferences.dailyHour(applicationContext),
+                    UtilPreferences.dailyMinute(applicationContext)
+                )
+            }
+        }
+       Log.d("ee", WorkManager.getInstance(applicationContext).getWorkInfosByTag("work").get().size.toString())
+      //  AutoStartPermissionHelper.getInstance().getAutoStartPermission(applicationContext)
         notif()
-        val workRequest = PeriodicWorkRequest.Builder(
-            Fetching::class.java,
-            15, TimeUnit.MINUTES
-        ).build()
-        WorkManager.getInstance().enqueueUniquePeriodicWork("newImages",
-            ExistingPeriodicWorkPolicy.REPLACE,workRequest)
     }
 
     private fun notif(){
@@ -44,21 +70,4 @@ class GlobalApp : Application() {
         }
     }
 
-    private fun scheduleWork(){
-        val currentDate = Calendar.getInstance()
-        val dueDate = Calendar.getInstance()
-        dueDate.set(Calendar.HOUR, 21)
-        dueDate.set(Calendar.MINUTE,30)
-        dueDate.set(Calendar.SECOND, 0)
-        if(dueDate.before(currentDate)){
-            dueDate.add(Calendar.HOUR_OF_DAY, 24)
-        }
-        val timeDiff = dueDate.timeInMillis - currentDate.timeInMillis
-        val dailyRequest = OneTimeWorkRequestBuilder<Fetching>()
-            .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
-            .addTag("TAG")
-            .build()
-
-        WorkManager.getInstance(applicationContext).enqueue(dailyRequest)
-    }
 }
