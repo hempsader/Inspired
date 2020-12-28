@@ -3,6 +3,7 @@
     <SwitchPreferenceCompat
         app:key="room"
         android:summaryOn="Offline quote catch ON"
+        android:enabled="true"
         android:summaryOff="Offline quote catch OFF"
         />
     <SwitchPreferenceCompat
@@ -19,8 +20,14 @@
             app:title="Daily Quote" />
         <Preference
             app:key="hour"
-            android:title="Select Notification Hour">
-
+            android:title="Select Notification Time">
         </Preference>
+        <Preference app:key="battery_saver"
+            android:title="Disable battery saver to receive daily notification"
+            android:icon="@drawable/ic_baseline_battery_full_24"/>
+        <Preference app:key="autostart"
+            android:title="Enable App Auto-Start"/>
     </PreferenceCategory>
+
+
 </PreferenceScreen>

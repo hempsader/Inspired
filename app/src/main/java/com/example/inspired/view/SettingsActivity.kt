@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
@@ -19,10 +20,12 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import com.example.inspired.R
+import com.example.inspired.util.PowerOptimisationForNotif
 import com.example.inspired.util.UtilPreferences
 import com.example.inspired.viewModel.fetching.Fetching
 import com.example.inspired.viewModel.fetching.FetchingFirstTime
 import com.example.inspired.viewModel.fetching.NotificationWorkStart
+import com.judemanutd.autostarter.AutoStartPermissionHelper
 import java.util.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -81,7 +84,8 @@ class SettingsActivity : AppCompatActivity() {
             val colors = findPreference<SwitchPreferenceCompat>("colors")
             val hour = findPreference<Preference>("hour")
             val daily = findPreference<SwitchPreferenceCompat>("daily_quote")
-
+            val batterySaver = findPreference<Preference>("battery_saver")
+            val autostart = findPreference<Preference>("autostart")
             room?.setOnPreferenceChangeListener { preference, newValue ->
                 if(room.isChecked){
                     room.isChecked = false
@@ -94,12 +98,25 @@ class SettingsActivity : AppCompatActivity() {
             }
 
            hour?.setOnPreferenceClickListener {
-               TimePick.show(parentFragmentManager,"setHour")
-
+               attention(requireContext())
                true
            }
-
-
+            batterySaver?.isVisible = false
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                batterySaver?.isVisible = true
+                batterySaver?.setOnPreferenceClickListener {
+                    PowerOptimisationForNotif.disableBatterySaverForThisApp(requireContext(), true)
+                    true
+                }
+            }
+            autostart?.isVisible = false
+            if(AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(requireContext())) {
+                autostart?.isVisible = true
+                 autostart?.setOnPreferenceClickListener {
+                    PowerOptimisationForNotif.enableAutoStart(requireContext(), true)
+                    true
+                }
+            }
 
             daily?.setOnPreferenceChangeListener { preference, newValue ->
                 if(daily?.isChecked){
@@ -115,13 +132,12 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
         private fun attention(context: Context){
-           val alert =  AlertDialog.Builder(context)
-                .setMessage("In order to not push pressure on the server and conserve battery, notification will not be at exact hour that you choose!")
+             AlertDialog.Builder(context)
+                .setMessage("In order to not push pressure on the server and conserve battery, notification will not be at exact time that you choose!")
                 .setNeutralButton("Dismiss") { dialog, which ->
                     dialog.dismiss()
-                }
-               .create()
-            alert.show()
+                    TimePick.show(parentFragmentManager,"setHour")
+                }.show()
         }
 
         object TimePick: DialogFragment(), TimePickerDialog.OnTimeSetListener {
@@ -137,7 +153,7 @@ class SettingsActivity : AppCompatActivity() {
                 UtilPreferences.dailyHourSet(requireContext(),hourOfDay)
                 UtilPreferences.dailyMinuteSet(requireContext(), minute)
                 if(!UtilPreferences.scheduleNewWork(requireContext())) {
-                    NotificationWorkStart.cancelOneTime(requireContext())
+             //       NotificationWorkStart.cancelOneTime(requireContext())
                     NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(requireContext()), UtilPreferences.dailyMinute(requireContext()))
                 }
             }

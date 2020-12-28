@@ -1,16 +1,20 @@
 package com.example.inspired.view
 
+import android.app.AlertDialog
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.example.inspired.util.InternetUtil
 import com.example.inspired.util.UtilPreferences
@@ -31,22 +35,30 @@ class GlobalApp : Application() {
        val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         InternetUtil.initialise(applicationContext, applicationScope)
         InternetUtil.registerBroadCast()
-        if( AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(applicationContext)){
-            if(AutoStartPermissionHelper.getInstance().getAutoStartPermission(applicationContext)){
-                Log.d("dd", "success")
-            }else{
-                Log.d("dd", "failure")
+        firstTimeRunNotif()
+        notif()
+    }
+
+    private fun notif(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val name = "Inspired"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID,name,importance).apply {
+                vibrationPattern = longArrayOf(500)
+                setSound(Settings.System.DEFAULT_NOTIFICATION_URI, null)
             }
-        }else{
-            Log.d("dd", "bad")
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    private fun firstTimeRunNotif(){
         if(UtilPreferences.scheduleNewWork(applicationContext)) {
+            UtilPreferences.scheduleNewWorkSet(applicationContext, false)
             UtilPreferences.dailyMinuteSet(applicationContext,0)
             val randomHour = Random.nextInt(8, 20)
             UtilPreferences.dailyHourSet(applicationContext, randomHour)
-            UtilPreferences.scheduleNewWorkSet(applicationContext, false)
             if(UtilPreferences.dailyEnable(applicationContext)) {
-                Log.d("dd", "asdasda")
                 NotificationWorkStart.cancelOneTime(applicationContext)
                 NotificationWorkStart.start(
                     applicationContext,
@@ -55,19 +67,5 @@ class GlobalApp : Application() {
                 )
             }
         }
-       Log.d("ee", WorkManager.getInstance(applicationContext).getWorkInfosByTag("work").get().size.toString())
-      //  AutoStartPermissionHelper.getInstance().getAutoStartPermission(applicationContext)
-        notif()
     }
-
-    private fun notif(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val name = "Inspired"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID,name,importance)
-            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
 }

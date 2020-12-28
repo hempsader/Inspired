@@ -1,9 +1,8 @@
 package com.example.inspired.view
 
-import android.content.BroadcastReceiver
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
@@ -16,8 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.fragment.app.Fragment
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -28,13 +26,13 @@ import com.example.inspired.repository.QuoteRepositoryImpl
 import com.example.inspired.util.*
 import com.example.inspired.viewModel.QuoteViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.android.synthetic.main.main_fragment.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 
 class FragmentRandom : VisibleFragment() {
     private lateinit var inspireMeButton: TextView
@@ -71,7 +69,7 @@ class FragmentRandom : VisibleFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        batterySaverIgnore()
+
         val view = inflater.inflate(R.layout.main_fragment, container, false)
         inspireMeButton = view.findViewById(R.id.inspireMe)
         shareImage = view.findViewById(R.id.imageShare)
@@ -113,35 +111,25 @@ class FragmentRandom : VisibleFragment() {
                 snack(it.string)
             }
         })
-        //fetchingClick()
 
         firstTimeFetch()
+        if(AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(requireContext())) {
+            PowerOptimisationForNotif.enableAutoStart(requireContext(),UtilPreferences.scheduleNewWork(requireContext()))
+        }
+        PowerOptimisationForNotif.disableBatterySaverForThisApp(requireContext(), UtilPreferences.scheduleNewWork(requireContext()))
         fetchclick()
         return view
     }
 
-    private fun batterySaverIgnore(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val intent = Intent()
-            val packageName = context?.packageName
-            val pm = context?.getSystemService(Context.POWER_SERVICE) as PowerManager
-            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                intent.data = Uri.parse("package:$packageName")
-                startActivity(intent)
-            }
-        }
-    }
+
 
     private fun uiCheck(quote: QuoteResponse.Quote) {
-        if (quote != null) {
-            favouriteImage.visibility = View.VISIBLE
-            shareImage.visibility = View.VISIBLE
-            inspireMeButton.visibility = View.VISIBLE
-            progressBar.visibility = View.GONE
-            quote_text.text = quote.text
-            author.text = quote.author
-        }
+        favouriteImage.visibility = View.VISIBLE
+        shareImage.visibility = View.VISIBLE
+        inspireMeButton.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
+        quote_text.text = quote.text
+        author.text = quote.author
     }
 
     private fun favourite(quote: QuoteResponse.Quote) {
@@ -187,6 +175,8 @@ class FragmentRandom : VisibleFragment() {
             }
         }
     }
+
+
 
     @InternalCoroutinesApi
     private fun fetchclick() {
