@@ -35,7 +35,6 @@ class GlobalApp : Application() {
        val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         InternetUtil.initialise(applicationContext, applicationScope)
         InternetUtil.registerBroadCast()
-        firstTimeRunNotif()
         notif()
     }
 
@@ -52,20 +51,4 @@ class GlobalApp : Application() {
         }
     }
 
-    private fun firstTimeRunNotif(){
-        if(UtilPreferences.scheduleNewWork(applicationContext)) {
-            UtilPreferences.scheduleNewWorkSet(applicationContext, false)
-            UtilPreferences.dailyMinuteSet(applicationContext,0)
-            val randomHour = Random.nextInt(8, 20)
-            UtilPreferences.dailyHourSet(applicationContext, randomHour)
-            if(UtilPreferences.dailyEnable(applicationContext)) {
-                NotificationWorkStart.cancelOneTime(applicationContext)
-                NotificationWorkStart.start(
-                    applicationContext,
-                    UtilPreferences.dailyHour(applicationContext),
-                    UtilPreferences.dailyMinute(applicationContext)
-                )
-            }
-        }
-    }
 }

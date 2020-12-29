@@ -86,12 +86,13 @@ class SettingsActivity : AppCompatActivity() {
             val daily = findPreference<SwitchPreferenceCompat>("daily_quote")
             val batterySaver = findPreference<Preference>("battery_saver")
             val autostart = findPreference<Preference>("autostart")
+
             room?.setOnPreferenceChangeListener { preference, newValue ->
                 if(room.isChecked){
                     room.isChecked = false
                     UtilPreferences.roomEnableSet(requireContext(),false)
                 }else{
-                    room.isChecked = false
+                    room.isChecked = true
                     UtilPreferences.roomEnableSet(requireContext(),true)
                 }
                 true
@@ -122,10 +123,14 @@ class SettingsActivity : AppCompatActivity() {
                 if(daily?.isChecked){
                     daily.isChecked = false
                     hour?.isEnabled = false
+                    autostart?.isEnabled = false
+                    batterySaver?.isEnabled = false
                     UtilPreferences.dailyEnableSet(requireContext(),false)
                 }else{
                     daily.isChecked = true
                     hour?.isEnabled = true
+                    autostart?.isEnabled = true
+                    batterySaver?.isEnabled = true
                     UtilPreferences.dailyEnableSet(requireContext(),true)
                 }
                 true
@@ -153,7 +158,7 @@ class SettingsActivity : AppCompatActivity() {
                 UtilPreferences.dailyHourSet(requireContext(),hourOfDay)
                 UtilPreferences.dailyMinuteSet(requireContext(), minute)
                 if(!UtilPreferences.scheduleNewWork(requireContext())) {
-             //       NotificationWorkStart.cancelOneTime(requireContext())
+                    NotificationWorkStart.cancelFetchJob(requireContext())
                     NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(requireContext()), UtilPreferences.dailyMinute(requireContext()))
                 }
             }

@@ -40,7 +40,7 @@ class PowerOptimisationForNotif {
                         Log.d("xx", "sdas")
                         AlertDialog.Builder(context)
                             .setTitle("Battery Saver")
-                            .setMessage("In order to receive daily Quote notification when battery saver is ON, battery saver for this app will be disabled. You also can change this setting in app settings. After dismiss, if nothing is shown, then battery saver is OFF, so you WILL receive notifications. This setting will not affect battery life!")
+                            .setMessage("In order to receive daily Quote notification when battery saver is ON, enable work in background. You also can change this setting in app settings. After dismiss, if nothing is shown, then battery saver is OFF, so you WILL should receive notifications. This setting will not affect battery life!")
                             .setNeutralButton("Dismiss") { dialog, _ ->
                                 dialog.dismiss()
                                 val intent = Intent()

@@ -23,20 +23,20 @@ class FetchingFirstTime(private val context: Context, private val workerParamete
     @RequiresApi(Build.VERSION_CODES.O)
     @InternalCoroutinesApi
     override suspend fun doWork(): Result {
+        val info = WorkManager.getInstance(context).getWorkInfoById(id)
         try {
                 fetchQuote()
                 NotificationWorkStart.startPeriodic(applicationContext)
+            Log.d("xx", info?.get().state.toString())
                return Result.success()
 
         }catch (e: Exception){
             if(runAttemptCount > 3){
                 return Result.failure()
             }
-        }finally {
-                NotificationWorkStart.start(applicationContext, UtilPreferences.dailyHour(applicationContext), UtilPreferences.dailyMinute(applicationContext))
         }
-        NotificationWorkStart.startPeriodic(applicationContext)
-        return Result.success()
+        Log.d("xx", info?.get().state.toString())
+        return Result.retry()
     }
 
     @InternalCoroutinesApi
@@ -59,21 +59,24 @@ class FetchingFirstTime(private val context: Context, private val workerParamete
                         }
                     }
                 } catch (e: Exception) {
-
-                } finally {
                     coroutineScope.launch {
                         val quote = repository.getQuoteRandomFromDb()?.random()
-                        broadcastSentQuote(
-                            0,
-                            NotificationWorkStart.notif(quote!!, applicationContext)
-                        )
+                        broadcastSentQuote(0, NotificationWorkStart.notif(quote!!, applicationContext))
                     }
                 }
             }
             false -> {
                 coroutineScope.launch {
-                    val quote = repository.getQuoteRandomFromDb()?.random()
-                    broadcastSentQuote(0, NotificationWorkStart.notif(quote!!, applicationContext))
+                    try {
+                        val quote = repository.getQuoteRandomFromDb()?.random()
+                        broadcastSentQuote(
+                            0,
+                            NotificationWorkStart.notif(quote!!, applicationContext)
+                        )
+                    }catch (e: Exception){
+                        broadcastSentQuote(0,
+                        NotificationWorkStart.notifEmptyDB(applicationContext))
+                    }
                 }
             }
         }

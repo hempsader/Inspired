@@ -24,11 +24,6 @@ class UtilPreferences {
             context.getSharedPreferences("dailyMinute", Context.MODE_PRIVATE).edit().putInt("dailyMinute",minute).apply()
         }
 
-        fun openAppNotif(context: Context): Boolean = context.getSharedPreferences("openAppNotif", Context.MODE_PRIVATE).getBoolean("openAppNotif", false)
-        fun openAppNotifSet(context: Context, open: Boolean){
-            context.getSharedPreferences("openAppNotif", Context.MODE_PRIVATE).edit().putBoolean("openAppNotif", open).apply()
-        }
-
         fun scheduleNewWork(context: Context): Boolean = context.getSharedPreferences("schedule", Context.MODE_PRIVATE).getBoolean("schedule",true)
         fun scheduleNewWorkSet(context: Context, schedule: Boolean){
             context.getSharedPreferences("schedule", Context.MODE_PRIVATE).edit().putBoolean("schedule", schedule).apply()

@@ -25,13 +25,11 @@ class Fetching(private val context: Context, private val params: WorkerParameter
                 fetchQuote()
                 return Result.success()
         }catch (e: Exception){
-            if(runAttemptCount > 3){
+            if(runAttemptCount > 5){
                 return Result.failure()
             }
-        }finally {
-            NotificationWorkStart.start(applicationContext, UtilPreferences.dailyHour(applicationContext), UtilPreferences.dailyMinute(applicationContext))
         }
-        return Result.success()
+        return Result.retry()
     }
     @InternalCoroutinesApi
     private fun fetchQuote() {
@@ -53,21 +51,24 @@ class Fetching(private val context: Context, private val params: WorkerParameter
                         }
                     }
                 } catch (e: Exception) {
-
-                } finally {
                     coroutineScope.launch {
                         val quote = repository.getQuoteRandomFromDb()?.random()
-                        broadcastSentQuote(
-                            0,
-                            NotificationWorkStart.notif(quote!!, applicationContext)
-                        )
+                        broadcastSentQuote(0, NotificationWorkStart.notif(quote!!, applicationContext))
                     }
                 }
             }
             false -> {
                 coroutineScope.launch {
-                    val quote = repository.getQuoteRandomFromDb()?.random()
-                    broadcastSentQuote(0, NotificationWorkStart.notif(quote!!, applicationContext))
+                    try {
+                        val quote = repository.getQuoteRandomFromDb()?.random()
+                        broadcastSentQuote(
+                            0,
+                            NotificationWorkStart.notif(quote!!, applicationContext)
+                        )
+                    }catch (e: Exception){
+                        broadcastSentQuote(0,
+                        NotificationWorkStart.notifEmptyDB(applicationContext))
+                    }
                 }
             }
         }
@@ -75,20 +76,6 @@ class Fetching(private val context: Context, private val params: WorkerParameter
     private fun checkInternet(): Boolean{
         val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         return manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!
-    }
-    private fun notif(quote: QuoteResponse.Quote){
-        val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-            .setTicker("Inspire You")
-            .setSmallIcon(android.R.drawable.ic_menu_report_image)
-            .setContentTitle(quote.author)
-            .setContentText(quote.text)
-            .setStyle(
-                NotificationCompat.BigTextStyle()
-                .bigText(quote.text))
-            .setAutoCancel(true)
-            .build()
-        val notifManager = NotificationManagerCompat.from(context)
-        notifManager.notify(0, notification)
     }
 
     private fun broadcastSentQuote(requestCode: Int, notification: Notification){

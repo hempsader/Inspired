@@ -5,17 +5,14 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.work.*
+import com.example.inspired.R
 import com.example.inspired.model.QuoteResponse
+import com.example.inspired.view.MainActivity
 import com.example.inspired.view.NOTIFICATION_CHANNEL_ID
 import java.util.*
 import java.util.concurrent.TimeUnit
-import com.example.inspired.R
-import com.example.inspired.view.FragmentFavourite
-import com.example.inspired.view.FragmentRandom
-import com.example.inspired.view.MainActivity
 
 class NotificationWorkStart {
     companion object{
@@ -31,23 +28,25 @@ class NotificationWorkStart {
             val timeDiff = dueDate.timeInMillis - currentDate.timeInMillis
             val dailyWork = OneTimeWorkRequestBuilder<FetchingFirstTime>()
                 .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
+                .setBackoffCriteria(BackoffPolicy.LINEAR,OneTimeWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
                 .addTag("work")
                 .build()
-            WorkManager.getInstance(context.applicationContext).beginUniqueWork("firstWork", ExistingWorkPolicy.KEEP,dailyWork).enqueue()
+            WorkManager.getInstance(context.applicationContext).enqueueUniqueWork("firstWork", ExistingWorkPolicy.KEEP,dailyWork)
         }
 
         fun startPeriodic(context: Context){
             val dailyWork = PeriodicWorkRequestBuilder<Fetching>(1, TimeUnit.HOURS)
                 .addTag("work")
+                .setBackoffCriteria(BackoffPolicy.LINEAR,OneTimeWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
                 .build()
             WorkManager.getInstance(context.applicationContext).enqueueUniquePeriodicWork("periodicWork", ExistingPeriodicWorkPolicy.KEEP, dailyWork)
         }
 
-        fun cancelOneTime(context: Context){
-            WorkManager.getInstance(context.applicationContext).cancelAllWorkByTag("firstWork")
+        fun cancelFetchJob(context: Context){
+            WorkManager.getInstance(context.applicationContext).cancelAllWorkByTag("work")
         }
 
-         fun notif(quote: QuoteResponse.Quote, context: Context): Notification{
+         fun notif(quote: QuoteResponse.Quote, context: Context): Notification {
              val intentFavourite = Intent(context.applicationContext, NotificationFavBroadcast::class.java).apply {
                  putExtra("author", quote.author)
                  putExtra("text", quote.text)
@@ -68,6 +67,19 @@ class NotificationWorkStart {
                     NotificationCompat.BigTextStyle()
                     .bigText(quote.text))
                 .addAction(R.drawable.ic_baseline_favorite_24_true,"Add to Favourite", pendingIntentFav)
+                .setContentIntent(pendingIntentOpenApp)
+                .setAutoCancel(true)
+                .build()
+        }
+        fun notifEmptyDB(context: Context): Notification{
+            val appIntent =  Intent(context, MainActivity::class.java)
+            val pendingIntentOpenApp = PendingIntent.getActivity(context.applicationContext, 0, appIntent,  PendingIntent.FLAG_UPDATE_CURRENT)
+            return  NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+                .setTicker("Inspire You")
+                .setSmallIcon(android.R.drawable.ic_menu_report_image)
+                .setContentTitle("Oops")
+                .setContentText("Seems that there are no quotes fetched offline, come back to Inspired and fetch some quotes!")
+                .setStyle(NotificationCompat.BigTextStyle().bigText("Seems that there are no quotes fetched offline, come back to Inspired to fetch some quotes!"))
                 .setContentIntent(pendingIntentOpenApp)
                 .setAutoCancel(true)
                 .build()
