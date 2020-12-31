@@ -42,7 +42,6 @@ class SettingsActivity : AppCompatActivity() {
                 )
                 .commit()
         }
-
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
@@ -102,6 +101,7 @@ class SettingsActivity : AppCompatActivity() {
                attention(requireContext())
                true
            }
+            hour?.title = "Daily notification time: " +  UtilPreferences.dailyHour(requireContext()).toString() + ":" + UtilPreferences.dailyMinute(requireContext()).toString() ?: "Daily notification time"
             batterySaver?.isVisible = false
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 batterySaver?.isVisible = true
@@ -138,7 +138,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         private fun attention(context: Context){
              AlertDialog.Builder(context)
-                .setMessage("In order to not push pressure on the server and conserve battery, notification will not be at exact time that you choose!")
+                .setMessage("In order to conserve battery life and not to pressure server, notifications will not arrive at exact time that you choose!")
                 .setNeutralButton("Dismiss") { dialog, which ->
                     dialog.dismiss()
                     TimePick.show(parentFragmentManager,"setHour")
@@ -155,14 +155,14 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
-                UtilPreferences.dailyHourSet(requireContext(),hourOfDay)
+                UtilPreferences.dailyHourSet(requireContext(), hourOfDay)
                 UtilPreferences.dailyMinuteSet(requireContext(), minute)
                 if(!UtilPreferences.scheduleNewWork(requireContext())) {
                     NotificationWorkStart.cancelFetchJob(requireContext())
                     NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(requireContext()), UtilPreferences.dailyMinute(requireContext()))
                 }
             }
-
         }
     }
+
 }

@@ -22,7 +22,7 @@
             app:title="Daily Quote" />
         <Preference
             app:key="hour"
-            android:title="Select Notification Time">
+            >
         </Preference>
         <Preference app:key="battery_saver"
             android:title="Disable battery saver to receive daily notification"
