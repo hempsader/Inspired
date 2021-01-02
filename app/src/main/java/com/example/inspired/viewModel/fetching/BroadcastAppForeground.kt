@@ -16,7 +16,6 @@ class BroadcastAppForeground : BroadcastReceiver(){
        }
         val requestCode = intent?.getIntExtra(FetchingFirstTime.REQUEST_CODE, 0)
         val notification: Notification = intent?.getParcelableExtra(FetchingFirstTime.QUOTE)!!
-
          NotificationManagerCompat.from(context!!).apply {
             notify(requestCode!! , notification)
         }

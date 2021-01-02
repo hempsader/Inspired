@@ -35,7 +35,7 @@ class NotificationWorkStart {
         }
 
         fun startPeriodic(context: Context){
-            val dailyWork = PeriodicWorkRequestBuilder<Fetching>(1, TimeUnit.HOURS)
+            val dailyWork = PeriodicWorkRequestBuilder<Fetching>(30, TimeUnit.MINUTES)
                 .addTag("work")
                 .setBackoffCriteria(BackoffPolicy.LINEAR,OneTimeWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
                 .build()
@@ -51,7 +51,8 @@ class NotificationWorkStart {
                  putExtra("author", quote.author)
                  putExtra("text", quote.text)
                  putExtra("id", quote.id)
-                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                 putExtra("category", quote.category)
+                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
              }
              val pendingIntentFav = PendingIntent.getBroadcast(context.applicationContext,0, intentFavourite,PendingIntent.FLAG_UPDATE_CURRENT)
              val appIntent =  Intent(context, MainActivity::class.java)

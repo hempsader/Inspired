@@ -20,7 +20,7 @@ class QuoteRepositoryImpl(context: Context): QuoteRepository{
         dao?.insert(quote)
     }
 
-    override fun getFavourites(): Flow<List<QuoteResponse.Quote>> {
+    override  fun getFavourites(): Flow<List<QuoteResponse.Quote>> {
         return dao?.getFavourites()!!
     }
 
@@ -29,9 +29,7 @@ class QuoteRepositoryImpl(context: Context): QuoteRepository{
         return QuoteApi.get().getRandomQuote()
     }
 
-    override suspend fun deleteFavQuote(quote: QuoteResponse.Quote) {
-        TODO("Not yet implemented")
-    }
+
 
     override suspend fun getQuoteRandomFromDb(): List<QuoteResponse.Quote>? {
         return dao?.randomQuoteDbPull()
@@ -44,6 +42,8 @@ class QuoteRepositoryImpl(context: Context): QuoteRepository{
     override suspend fun fetchAll(): Flow<List<QuoteResponse.Quote>> {
       return  dao?.fetchAll()!!
     }
+
+
 
 }
 

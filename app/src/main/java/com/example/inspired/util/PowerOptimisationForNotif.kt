@@ -37,7 +37,6 @@ class PowerOptimisationForNotif {
         fun disableBatterySaverForThisApp(context: Context, firstTime: Boolean){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (firstTime) {
-                        Log.d("xx", "sdas")
                         AlertDialog.Builder(context)
                             .setTitle("Battery Saver")
                             .setMessage("In order to receive daily Quote notification when battery saver is ON, enable work in background. You also can change this setting in app settings. After dismiss, if nothing is shown, then battery saver is OFF, so you WILL should receive notifications. This setting will not affect battery life!")

@@ -23,8 +23,6 @@ class QuoteViewModel(private val repository: QuoteRepositoryImpl,private val cor
     fun observerLocalQuote(): LiveData<ResponseQuoteRandom> = quoteLocalMutableData
 
 
-
-
     fun fetchQuoteRemote(){
         viewModelScope.launch(context = coroutineScope) {
             try {

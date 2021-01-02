@@ -2,6 +2,7 @@ package com.example.inspired.util
 
 import android.content.Context
 
+
 class UtilPreferences {
     companion object{
         fun roomEnable(context: Context): Boolean = context.getSharedPreferences("roomEnable", Context.MODE_PRIVATE).getBoolean("roomEnable", true)
@@ -27,6 +28,16 @@ class UtilPreferences {
         fun scheduleNewWork(context: Context): Boolean = context.getSharedPreferences("schedule", Context.MODE_PRIVATE).getBoolean("schedule",true)
         fun scheduleNewWorkSet(context: Context, schedule: Boolean){
             context.getSharedPreferences("schedule", Context.MODE_PRIVATE).edit().putBoolean("schedule", schedule).apply()
+        }
+
+        fun sortType(context: Context): Int = context.getSharedPreferences("sortBy", Context.MODE_PRIVATE).getInt("sortBy",0)
+        fun sortTypeSet(context: Context, type: Int){
+            context.getSharedPreferences("sortBy",Context.MODE_PRIVATE).edit().putInt("sortBy",type).apply()
+        }
+
+        fun unfavouriteQuote(context: Context): String? = context.getSharedPreferences("unfavourite", Context.MODE_PRIVATE).getString("unfavourite", "error")
+        fun unfavouriteQuoteSet(context: Context, id: String){
+            context.getSharedPreferences("unfavourite", Context.MODE_PRIVATE).edit().putString("unfavourite", id).apply()
         }
     }
 

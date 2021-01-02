@@ -1,25 +1,22 @@
 package com.example.inspired.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.inspired.R
 import com.example.inspired.model.QuoteResponse
 import com.example.inspired.repository.QuoteRepositoryImpl
 import com.example.inspired.util.DialogFavourite
+import com.example.inspired.util.UtilPreferences
 import com.example.inspired.viewModel.QuoteFavouriteViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 class FragmentFavourite : VisibleFragment(), ClickedQuote,
     ClickFavourite {
@@ -31,8 +28,7 @@ class FragmentFavourite : VisibleFragment(), ClickedQuote,
             }
         })[QuoteFavouriteViewModel::class.java]
     }
-    private val adapterFavourites =
-        FavouriteList(this, this)
+    private var adapterFavourites : FavouriteList? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,7 +37,7 @@ class FragmentFavourite : VisibleFragment(), ClickedQuote,
     ): View? {
         val view = inflater.inflate(R.layout.fragment_favourite,container,false)
         val recycler = view.findViewById<RecyclerView>(R.id.recycler_view_favourite)
-
+        adapterFavourites = FavouriteList(this, this)
         recycler.apply {
             layoutManager = LinearLayoutManager(requireContext())
         }
@@ -52,9 +48,11 @@ class FragmentFavourite : VisibleFragment(), ClickedQuote,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel.favouriteMutableLiveData.observe(viewLifecycleOwner, Observer {
-            adapterFavourites.setList(it)
+        viewModel.favouriteMutableLiveData.observe(viewLifecycleOwner, Observer {list->
+            sort(UtilPreferences.sortType(requireContext()),list)
+            adapterFavourites?.setList(list)
         })
+
     }
 
     override fun sendQuote(quote: QuoteResponse.Quote) {
@@ -69,3 +67,4 @@ class FragmentFavourite : VisibleFragment(), ClickedQuote,
         viewModel.favouriteUpdate(quote)
     }
 }
+

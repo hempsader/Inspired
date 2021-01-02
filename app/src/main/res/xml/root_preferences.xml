@@ -7,9 +7,14 @@
         android:enabled="true"
         android:summaryOff="Offline quote catch OFF"
         />
-    <SwitchPreferenceCompat
-        app:key="colors"
-        app:title="Each quote have different color" />
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/sortBy"
+        android:entryValues="@array/sortBy"
+        android:key="sortBy_list"
+        android:title="Sort By "
+        app:defaultValue="Category"/>
+
 
     <PreferenceCategory
         android:title="Daily Quote">

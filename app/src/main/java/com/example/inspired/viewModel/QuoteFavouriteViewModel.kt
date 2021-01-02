@@ -5,6 +5,8 @@ import androidx.lifecycle.*
 import com.example.inspired.model.QuoteResponse
 import com.example.inspired.repository.QuoteRepository
 import com.example.inspired.repository.QuoteRepositoryImpl
+import com.example.inspired.util.UtilPreferences
+import com.example.inspired.view.sort
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
@@ -17,10 +19,11 @@ class QuoteFavouriteViewModel(private val repository: QuoteRepositoryImpl, priva
                 get() = repository.getFavourites().flowOn(Dispatchers.Main)
                     .asLiveData()
 
-
     fun  favouriteUpdate(quote: QuoteResponse.Quote){
         viewModelScope.launch(context = coroutineScope) {
             repository.updateQuote(quote)
         }
     }
+
+
 }

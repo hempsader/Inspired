@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
@@ -26,6 +27,7 @@ import com.example.inspired.viewModel.fetching.Fetching
 import com.example.inspired.viewModel.fetching.FetchingFirstTime
 import com.example.inspired.viewModel.fetching.NotificationWorkStart
 import com.judemanutd.autostarter.AutoStartPermissionHelper
+import okhttp3.internal.Util
 import java.util.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -76,15 +78,15 @@ class SettingsActivity : AppCompatActivity() {
 
 
     class SettingsFragment : PreferenceFragmentCompat() {
-
+            private lateinit var hour: Preference
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
             val room = findPreference<SwitchPreferenceCompat>("room")
-            val colors = findPreference<SwitchPreferenceCompat>("colors")
-            val hour = findPreference<Preference>("hour")
+             hour = findPreference<Preference>("hour")!!
             val daily = findPreference<SwitchPreferenceCompat>("daily_quote")
             val batterySaver = findPreference<Preference>("battery_saver")
             val autostart = findPreference<Preference>("autostart")
+            val sortList = findPreference<ListPreference>("sortBy_list")
 
             room?.setOnPreferenceChangeListener { preference, newValue ->
                 if(room.isChecked){
@@ -101,7 +103,8 @@ class SettingsActivity : AppCompatActivity() {
                attention(requireContext())
                true
            }
-            hour?.title = "Daily notification time: " +  UtilPreferences.dailyHour(requireContext()).toString() + ":" + UtilPreferences.dailyMinute(requireContext()).toString() ?: "Daily notification time"
+
+            hour?.title = formatNotificationTime(UtilPreferences.dailyHour(requireContext()), UtilPreferences.dailyMinute(requireContext()))
             batterySaver?.isVisible = false
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 batterySaver?.isVisible = true
@@ -118,6 +121,21 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
+            sortList?.title = sortTextString(UtilPreferences.sortType(requireContext()))
+            sortList?.setOnPreferenceChangeListener { preference, newValue ->
+                    UtilPreferences.sortTypeSet(requireContext(), sortTextInt(newValue as String))
+                    sortList?.title = sortTextString(UtilPreferences.sortType(requireContext()))
+                true
+            }
+            if(!daily?.isChecked!!){
+                hour?.isEnabled = false
+                autostart?.isEnabled = false
+                batterySaver?.isEnabled = false
+            }else{
+                hour?.isEnabled = true
+                autostart?.isEnabled = true
+                batterySaver?.isEnabled = true
+            }
 
             daily?.setOnPreferenceChangeListener { preference, newValue ->
                 if(daily?.isChecked){
@@ -126,12 +144,15 @@ class SettingsActivity : AppCompatActivity() {
                     autostart?.isEnabled = false
                     batterySaver?.isEnabled = false
                     UtilPreferences.dailyEnableSet(requireContext(),false)
+                    NotificationWorkStart.cancelFetchJob(requireContext())
                 }else{
                     daily.isChecked = true
                     hour?.isEnabled = true
                     autostart?.isEnabled = true
                     batterySaver?.isEnabled = true
                     UtilPreferences.dailyEnableSet(requireContext(),true)
+                    NotificationWorkStart.cancelFetchJob(requireContext())
+                    NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(requireContext()), UtilPreferences.dailyMinute(requireContext()))
                 }
                 true
             }
@@ -139,13 +160,42 @@ class SettingsActivity : AppCompatActivity() {
         private fun attention(context: Context){
              AlertDialog.Builder(context)
                 .setMessage("In order to conserve battery life and not to pressure server, notifications will not arrive at exact time that you choose!")
-                .setNeutralButton("Dismiss") { dialog, which ->
+                .setNeutralButton("Dismiss") { dialog, _ ->
                     dialog.dismiss()
-                    TimePick.show(parentFragmentManager,"setHour")
+                    TimePick(hour).show(parentFragmentManager,"setHour")
                 }.show()
         }
 
-        object TimePick: DialogFragment(), TimePickerDialog.OnTimeSetListener {
+        private fun formatNotificationTime(hour: Int, minute: Int): String {
+            val hour = if (hour < 10) "0${hour}" else "$hour"
+            val minute = if (minute < 10) "0${minute}" else "$minute"
+            return "Notification time around: $hour:$minute"
+        }
+
+        private fun sortTextInt(sort: String): Int {
+           return when(sort){
+                "Category" -> {
+                   0
+                }
+               "Text" -> {
+                  1
+               }
+               "Author" -> {
+                  2
+               }
+               else -> 0
+           }
+        }
+        private fun sortTextString(sort: Int): String{
+            return when(sort){
+                CATEGORY -> "Sort by Category"
+                TEXT -> "Sort by Text"
+                AUTHOR -> "Sort by Author"
+                else -> "Sort by Category"
+            }
+        }
+
+         class TimePick(private val time: Preference): DialogFragment(), TimePickerDialog.OnTimeSetListener {
 
             override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
                 val c = Calendar.getInstance()
@@ -157,6 +207,9 @@ class SettingsActivity : AppCompatActivity() {
             override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
                 UtilPreferences.dailyHourSet(requireContext(), hourOfDay)
                 UtilPreferences.dailyMinuteSet(requireContext(), minute)
+                val hour = if (hourOfDay < 10) "0${hourOfDay}" else "${hourOfDay}"
+                val minute = if (minute < 10) "0${minute}" else "${minute}"
+                time.title = "Notification time around: $hour:$minute"
                 if(!UtilPreferences.scheduleNewWork(requireContext())) {
                     NotificationWorkStart.cancelFetchJob(requireContext())
                     NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(requireContext()), UtilPreferences.dailyMinute(requireContext()))

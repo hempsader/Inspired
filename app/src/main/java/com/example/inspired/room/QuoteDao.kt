@@ -26,4 +26,6 @@ interface QuoteDao{
     @Query("select * from quote_db")
     fun fetchAll(): Flow<List<QuoteResponse.Quote>>
 
+
+
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -33,11 +34,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
-class FragmentRandom : VisibleFragment() {
+class FragmentRandom : VisibleFragment(), ClickFavourite {
     private lateinit var inspireMeButton: MaterialButton
     private lateinit var shareImage: MaterialButton
     private lateinit var progress: ProgressBar
@@ -47,6 +51,7 @@ class FragmentRandom : VisibleFragment() {
     private lateinit var cardViewMainText: CardView
     private lateinit var cardVIewButtons: CardView
     private lateinit var mainLayout: ConstraintLayout
+    private lateinit var category: TextView
     private var quote: QuoteResponse.Quote? = null
 
 
@@ -78,19 +83,21 @@ class FragmentRandom : VisibleFragment() {
         cardViewMainText = view.findViewById(R.id.cardView)
         cardVIewButtons = view.findViewById(R.id.cardView2)
         mainLayout = view.findViewById(R.id.mainLayout)
+        category = view.findViewById(R.id.category)
 
         if(savedInstanceState != null){
             val id = savedInstanceState.getString("quote_id")
             val text = savedInstanceState.getString("quote_text")
             val author = savedInstanceState.getString("quote_author")
             val favourite = savedInstanceState.getBoolean("quote_favourite")
-            val quote = QuoteResponse.Quote(id!!,text!!,author!!,favourite)
+            val category = savedInstanceState.getString("quote_category")
+            val quote = QuoteResponse.Quote(id!!,text!!,author!!,favourite, category!!)
             quoteUI(quote)
         }else{
             firstTimeFetch()
         }
         viewModel.observeRemoteQuote().observe(viewLifecycleOwner, Observer {
-            if(Build.VERSION.SDK_INT >= 23 && internetSpeed() ?: 50 < 100){
+            if(internetConnection() == NetworkInfo.DetailedState.VERIFYING_POOR_LINK){
                 viewModel.fetchLocalQuote()
             }
             if (it is ResponseQuoteRandom.ResponseSuccesfull) {
@@ -131,6 +138,7 @@ class FragmentRandom : VisibleFragment() {
             }
         })
 
+
         randomGradient()
         firstTimeRunNotif()
         fetchclick()
@@ -141,9 +149,9 @@ class FragmentRandom : VisibleFragment() {
         outState.putString("quote_id", quote?.id)
         outState.putString("quote_text", quote?.text)
         outState.putString("quote_author", quote?.author)
-        outState.putBoolean("quote_favourite", quote?.favourite!!)
+        outState.putBoolean("quote_favourite", quote?.favourite ?: false)
+        outState.putString("quote_category", quote?.category)
     }
-
 
     private fun loadingQuoteUI(){
         progress.visibility = View.VISIBLE
@@ -154,11 +162,13 @@ class FragmentRandom : VisibleFragment() {
         quoteAuthor.visibility = View.GONE
         cardViewMainText.visibility = View.GONE
         cardVIewButtons.visibility = View.GONE
+        category.visibility = View.GONE
     }
 
     private fun quoteUI(quote: QuoteResponse.Quote){
         progress.visibility = View.GONE
         inspireMeButton.visibility = View.VISIBLE
+        category.visibility = View.VISIBLE
         shareImage.visibility = View.VISIBLE
         favouriteImageView.visibility = View.VISIBLE
         quoteText.visibility = View.VISIBLE
@@ -169,9 +179,9 @@ class FragmentRandom : VisibleFragment() {
         if(quote != null){
             quoteText.text = quote.text
             quoteAuthor.text = quote.author
+            category.text = "#${quote.category}"
         }
     }
-
 
     private fun randomGradient(){
         val rnd = Random
@@ -186,8 +196,6 @@ class FragmentRandom : VisibleFragment() {
         }
         mainLayout.background = gd
     }
-
-
 
     private fun favourite(quote: QuoteResponse.Quote) {
         favouriteImageView.setOnClickListener {
@@ -251,10 +259,10 @@ class FragmentRandom : VisibleFragment() {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun internetSpeed(): Int? {
+    private fun internetConnection(): NetworkInfo.DetailedState? {
         val connectivity = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val nc = connectivity.getNetworkCapabilities(connectivity.activeNetwork)
-        return nc?.linkDownstreamBandwidthKbps
+        val info = connectivity.activeNetworkInfo
+        return info?.detailedState
     }
 
 
@@ -279,6 +287,11 @@ class FragmentRandom : VisibleFragment() {
             }
         }
     }
+
+    override fun sendQuoteFavourite(quote: QuoteResponse.Quote) {
+        Log.d("xx", "dasdasd")
+    }
+
 }
 
 

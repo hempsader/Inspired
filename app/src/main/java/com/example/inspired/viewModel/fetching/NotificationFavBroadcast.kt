@@ -19,7 +19,8 @@ class NotificationFavBroadcast : BroadcastReceiver(){
             val id = intent.getStringExtra("id")
             val author = intent.getStringExtra("author")
             val text = intent.getStringExtra("text")
-            val quote = QuoteResponse.Quote(id!!,text!!,author!!, true)
+            val category = intent.getStringExtra("category")
+            val quote = QuoteResponse.Quote(id!!,text!!,author!!, true, category!!)
             scope.launch {
                 repo.insertQuote(quote)
             }

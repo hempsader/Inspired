@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.example.inspired.R
 import com.example.inspired.model.QuoteResponse
+import com.google.android.material.button.MaterialButton
 import kotlinx.android.synthetic.main.dialog_favourite.*
 
 class DialogFavourite: DialogFragment(){
@@ -41,7 +42,8 @@ class DialogFavourite: DialogFragment(){
 
         val dialogText = view.findViewById<TextView>(R.id.dialog_text)
         val dialogAuthor = view.findViewById<TextView>(R.id.dialog_author)
-        view.findViewById<ImageButton>(R.id.imageButton_share).apply {
+        val dialogCategory = view.findViewById<TextView>(R.id.dialog_category)
+        view.findViewById<MaterialButton>(R.id.imageButton_share).apply {
             setOnClickListener {
                 quote?.let { ShareQuote(requireContext()).quote(it) }
             }
@@ -53,6 +55,7 @@ class DialogFavourite: DialogFragment(){
         }
         dialogText.text = quote?.text
         dialogAuthor.text = quote?.author
+        dialogCategory.text = "#"+quote?.category
 
         return view
     }

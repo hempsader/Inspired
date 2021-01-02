@@ -13,7 +13,8 @@ data class QuoteResponse(@SerializedName("data") val quote: List<Quote>) {
         @SerializedName("_id") val id: String,
         @SerializedName("quoteText") val text: String,
         @SerializedName("quoteAuthor") val author: String,
-        var favourite: Boolean = false
+        var favourite: Boolean = false,
+        @SerializedName("quoteGenre") val category: String
     )
 
 }
