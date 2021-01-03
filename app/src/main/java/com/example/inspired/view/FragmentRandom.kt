@@ -33,15 +33,12 @@ import kotlinx.android.synthetic.main.main_fragment.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
-class FragmentRandom : VisibleFragment(), ClickFavourite {
+class FragmentRandom : VisibleFragment(){
     private lateinit var inspireMeButton: MaterialButton
     private lateinit var shareImage: MaterialButton
     private lateinit var progress: ProgressBar
@@ -107,7 +104,12 @@ class FragmentRandom : VisibleFragment(), ClickFavourite {
                     favourite(it.quote!!)
                     shareQuote(it.quote)
                     if (UtilPreferences.roomEnable(requireContext())) {
-                        viewModel.insertOfflineQuote(it.quote)
+                        if(!lowMemoryDetect()) {
+                            viewModel.insertOfflineQuote(it.quote)
+                        }else{
+                            snack("Low memory, fetching offline!")
+                            viewModel.fetchLocalQuote()
+                        }
                     }
                     if (it.quote?.favourite!!) favouriteImageView.setIconResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImageView.setIconResource(
                         R.drawable.ic_outline_favorite_border_24_false
@@ -138,11 +140,20 @@ class FragmentRandom : VisibleFragment(), ClickFavourite {
             }
         })
 
-
+        unfavouriteUI()
         randomGradient()
         firstTimeRunNotif()
         fetchclick()
         return view
+    }
+
+    private fun unfavouriteUI(){
+        UnfavouriteFlow.initialise()
+        viewLifecycleOwner.lifecycleScope.launch() {
+            UnfavouriteFlow.readFavourite().collect {
+                Log.d("xx", it)
+            }
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -151,6 +162,10 @@ class FragmentRandom : VisibleFragment(), ClickFavourite {
         outState.putString("quote_author", quote?.author)
         outState.putBoolean("quote_favourite", quote?.favourite ?: false)
         outState.putString("quote_category", quote?.category)
+    }
+
+    private fun lowMemoryDetect(): Boolean{
+        return requireContext().cacheDir.usableSpace * 100 / requireContext().cacheDir.totalSpace <= 10
     }
 
     private fun loadingQuoteUI(){
@@ -199,12 +214,17 @@ class FragmentRandom : VisibleFragment(), ClickFavourite {
 
     private fun favourite(quote: QuoteResponse.Quote) {
         favouriteImageView.setOnClickListener {
-            quote.favourite = !quote.favourite
-            if (quote.favourite) favouriteImageView.setIconResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImageView.setIconResource(
-                R.drawable.ic_outline_favorite_border_24_false
-            )
-            viewModel.insertOfflineQuote(quote)
-            viewModel.favouriteQuote(quote)
+
+            if(!lowMemoryDetect()) {
+                quote.favourite = !quote.favourite
+                if (quote.favourite) favouriteImageView.setIconResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImageView.setIconResource(
+                    R.drawable.ic_outline_favorite_border_24_false
+                )
+                viewModel.insertOfflineQuote(quote)
+                viewModel.favouriteQuote(quote)
+            }else{
+                snack("Cannot insert to favourites, low data storage!")
+            }
         }
     }
 
@@ -288,9 +308,7 @@ class FragmentRandom : VisibleFragment(), ClickFavourite {
         }
     }
 
-    override fun sendQuoteFavourite(quote: QuoteResponse.Quote) {
-        Log.d("xx", "dasdasd")
-    }
+
 
 }
 

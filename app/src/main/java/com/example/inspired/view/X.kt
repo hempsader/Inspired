@@ -7,7 +7,7 @@ fun sort(sortType: Int, quoteList: List<QuoteResponse.Quote>) {
         when (sortType) {
             AUTHOR -> {
                 Collections.sort(quoteList) { old, new ->
-                    old.author.compareTo(new.category)
+                    old.author.compareTo(new.author)
                 }
             }
             TEXT -> {

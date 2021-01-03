@@ -1,5 +1,7 @@
 package com.example.inspired.view
 
+import android.content.SharedPreferences
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,14 +11,18 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.inspired.R
 import com.example.inspired.model.QuoteResponse
+import com.example.inspired.util.UnfavouriteFlow
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class FavouriteList(private val clickedQuote: ClickedQuote?, private val clickFavourite: ClickFavourite) : RecyclerView.Adapter<FavouriteList.FavouriteHolder>(){
 
 
     private var listQuotes = ArrayList<QuoteResponse.Quote>()
     fun setList(newQuoteList: List<QuoteResponse.Quote>){
-        DiffUtil.calculateDiff(FavListDiffUtill(this.listQuotes,newQuoteList)).dispatchUpdatesTo(this)
         listQuotes = newQuoteList as ArrayList<QuoteResponse.Quote>
+        notifyDataSetChanged()
     }
 
    inner class FavouriteHolder(itemView: View): RecyclerView.ViewHolder(itemView), View.OnClickListener {
@@ -34,6 +40,13 @@ class FavouriteList(private val clickedQuote: ClickedQuote?, private val clickFa
             favourite = itemView.findViewById(R.id.imageView_favourite)
             favourite.setOnClickListener {
                 clickedFavourite.sendQuoteFavourite(listQuotes[adapterPosition])
+                UnfavouriteFlow.initialise()
+                UnfavouriteFlow.emitFavourite(listQuotes[adapterPosition])
+                GlobalScope.launch {
+                    UnfavouriteFlow.readFavourite().collect {
+                        Log.d("xx", it.toString())
+                    }
+                }
             }
             author = itemView.findViewById(R.id.author_favourite)
             author.setOnClickListener(this)
@@ -78,7 +91,7 @@ interface ClickFavourite{
 
 class FavListDiffUtill(private val quoteListOld: List<QuoteResponse.Quote>,private val quoteListNew: List<QuoteResponse.Quote>): DiffUtil.Callback(){
     override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return quoteListOld.get(oldItemPosition).id == quoteListNew.get(newItemPosition).id
+        return quoteListOld[oldItemPosition].id == quoteListNew[newItemPosition].id
     }
 
     override fun getOldListSize(): Int {
@@ -90,7 +103,7 @@ class FavListDiffUtill(private val quoteListOld: List<QuoteResponse.Quote>,priva
     }
 
     override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return quoteListOld.get(oldItemPosition).equals(quoteListNew.get(newItemPosition))
+        return quoteListOld[oldItemPosition] == quoteListNew[newItemPosition]
     }
 
     override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
