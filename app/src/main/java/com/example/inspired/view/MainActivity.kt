@@ -81,6 +81,8 @@ class MainActivity : AppCompatActivity() {
         tabLayout.getTabAt(1)?.setIcon(R.drawable.ic_outline_favorite_border_24_false)
         tabLayout.getTabAt(0)?.setIcon(R.drawable.ic_outline_transform_24)
     }
+
+
 }
 
 

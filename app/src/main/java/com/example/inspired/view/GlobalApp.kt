@@ -20,6 +20,8 @@ import com.example.inspired.util.InternetUtil
 import com.example.inspired.util.UtilPreferences
 import com.example.inspired.viewModel.fetching.NotificationWorkStart
 import com.judemanutd.autostarter.AutoStartPermissionHelper
+import com.squareup.leakcanary.LeakCanary
+import com.squareup.leakcanary.RefWatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,14 +31,18 @@ import kotlin.random.Random
 const val NOTIFICATION_CHANNEL_ID = "quote"
 
 class GlobalApp : Application() {
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
        val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         InternetUtil.initialise(applicationContext, applicationScope)
         InternetUtil.registerBroadCast()
+        LeakCanary.install(this)
         notif()
     }
+
 
     private fun notif(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){

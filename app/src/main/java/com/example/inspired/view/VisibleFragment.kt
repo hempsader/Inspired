@@ -27,4 +27,5 @@ abstract class VisibleFragment: Fragment(){
         requireActivity().unregisterReceiver(onShowNotification)
     }
 
+
 }

@@ -85,5 +85,7 @@ class FragmentFavourite : VisibleFragment(), ClickedQuote,
         quote.favourite = !quote.favourite
         viewModel.favouriteUpdate(quote)
     }
+
+
 }
 

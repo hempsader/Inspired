@@ -309,7 +309,6 @@ class FragmentRandom : VisibleFragment(){
     }
 
 
-
 }
 
 
