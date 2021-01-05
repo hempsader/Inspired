@@ -23,11 +23,9 @@ class FetchingFirstTime(private val context: Context, private val workerParamete
     @RequiresApi(Build.VERSION_CODES.O)
     @InternalCoroutinesApi
     override suspend fun doWork(): Result {
-        val info = WorkManager.getInstance(context).getWorkInfoById(id)
         try {
                 fetchQuote()
                 NotificationWorkStart.startPeriodic(applicationContext)
-            Log.d("xx", info?.get().state.toString())
                return Result.success()
 
         }catch (e: Exception){
@@ -35,14 +33,13 @@ class FetchingFirstTime(private val context: Context, private val workerParamete
                 return Result.failure()
             }
         }
-        Log.d("xx", info?.get().state.toString())
         return Result.retry()
     }
 
     @InternalCoroutinesApi
     private fun fetchQuote(){
         val coroutineScope = CoroutineScope(Job() + Dispatchers.IO)
-        val repository = QuoteRepositoryImpl(context)
+        val repository = QuoteRepositoryImpl()
         when (checkInternet()) {
             true -> {
                 try {

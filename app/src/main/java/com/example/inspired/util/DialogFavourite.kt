@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -37,7 +38,7 @@ class DialogFavourite: DialogFragment(){
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        getDialog()!!.getWindow()?.setBackgroundDrawableResource(R.drawable.dialog_shape);
+        dialog!!.window?.setBackgroundDrawableResource(R.drawable.dialog_shape);
         val view = inflater.inflate(R.layout.dialog_favourite,container,false)
 
         val dialogText = view.findViewById<TextView>(R.id.dialog_text)
@@ -45,7 +46,12 @@ class DialogFavourite: DialogFragment(){
         val dialogCategory = view.findViewById<TextView>(R.id.dialog_category)
         view.findViewById<MaterialButton>(R.id.imageButton_share).apply {
             setOnClickListener {
-                quote?.let { ShareQuote(requireContext()).quote(it) }
+                val shareQuote = Intent().apply{
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, quote?.text + " - " + quote?.author)
+                    type = "text/plain"
+                }
+                requireContext().startActivity(Intent.createChooser(shareQuote,"Inspired Quote"))
             }
         }
         view.findViewById<Button>(R.id.button_dismiss).apply {

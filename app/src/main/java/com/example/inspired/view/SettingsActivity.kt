@@ -87,14 +87,15 @@ class SettingsActivity : AppCompatActivity() {
             val batterySaver = findPreference<Preference>("battery_saver")
             val autostart = findPreference<Preference>("autostart")
             val sortList = findPreference<ListPreference>("sortBy_list")
+            val offlineFetch = findPreference<SwitchPreferenceCompat>("offline")
 
             room?.setOnPreferenceChangeListener { preference, newValue ->
                 if(room.isChecked){
                     room.isChecked = false
-                    UtilPreferences.roomEnableSet(requireContext(),false)
+                    UtilPreferences.roomEnableSet(false)
                 }else{
                     room.isChecked = true
-                    UtilPreferences.roomEnableSet(requireContext(),true)
+                    UtilPreferences.roomEnableSet(true)
                 }
                 true
             }
@@ -104,7 +105,7 @@ class SettingsActivity : AppCompatActivity() {
                true
            }
 
-            hour?.title = formatNotificationTime(UtilPreferences.dailyHour(requireContext()), UtilPreferences.dailyMinute(requireContext()))
+            hour?.title = formatNotificationTime(UtilPreferences.dailyHour(), UtilPreferences.dailyMinute())
             batterySaver?.isVisible = false
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 batterySaver?.isVisible = true
@@ -113,6 +114,19 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
+
+
+            offlineFetch?.setOnPreferenceClickListener {
+                if(offlineFetch?.isChecked){
+                    UtilPreferences.offlineFetchSet( true)
+                    offlineFetch?.isChecked = true
+                }else{
+                    UtilPreferences.offlineFetchSet( false)
+                    offlineFetch?.isChecked = false
+                }
+                true
+            }
+
             autostart?.isVisible = false
             if(AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(requireContext())) {
                 autostart?.isVisible = true
@@ -121,11 +135,11 @@ class SettingsActivity : AppCompatActivity() {
                     true
                 }
             }
-            sortList?.title = sortTextString(UtilPreferences.sortType(requireContext()))
+            sortList?.title = sortTextString(UtilPreferences.sortType())
             sortList?.setOnPreferenceChangeListener { preference, newValue ->
-                    UtilPreferences.sortTypeSet(requireContext(), sortTextInt(newValue as String))
-                    sortList?.title = sortTextString(UtilPreferences.sortType(requireContext()))
-                true
+                    UtilPreferences.sortTypeSet(sortTextInt(newValue as String))
+                    sortList?.title = sortTextString(UtilPreferences.sortType())
+                false
             }
             if(!daily?.isChecked!!){
                 hour?.isEnabled = false
@@ -143,16 +157,16 @@ class SettingsActivity : AppCompatActivity() {
                     hour?.isEnabled = false
                     autostart?.isEnabled = false
                     batterySaver?.isEnabled = false
-                    UtilPreferences.dailyEnableSet(requireContext(),false)
+                    UtilPreferences.dailyEnableSet(false)
                     NotificationWorkStart.cancelFetchJob(requireContext())
                 }else{
                     daily.isChecked = true
                     hour?.isEnabled = true
                     autostart?.isEnabled = true
                     batterySaver?.isEnabled = true
-                    UtilPreferences.dailyEnableSet(requireContext(),true)
+                    UtilPreferences.dailyEnableSet(true)
                     NotificationWorkStart.cancelFetchJob(requireContext())
-                    NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(requireContext()), UtilPreferences.dailyMinute(requireContext()))
+                    NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(), UtilPreferences.dailyMinute())
                 }
                 true
             }
@@ -205,18 +219,17 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
-                UtilPreferences.dailyHourSet(requireContext(), hourOfDay)
-                UtilPreferences.dailyMinuteSet(requireContext(), minute)
+                UtilPreferences.dailyHourSet( hourOfDay)
+                UtilPreferences.dailyMinuteSet( minute)
                 val hour = if (hourOfDay < 10) "0${hourOfDay}" else "${hourOfDay}"
                 val minute = if (minute < 10) "0${minute}" else "${minute}"
                 time.title = "Notification time around: $hour:$minute"
-                if(!UtilPreferences.scheduleNewWork(requireContext())) {
+                if(!UtilPreferences.scheduleNewWork()) {
                     NotificationWorkStart.cancelFetchJob(requireContext())
-                    NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(requireContext()), UtilPreferences.dailyMinute(requireContext()))
+                    NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(), UtilPreferences.dailyMinute())
                 }
             }
         }
     }
-
 
 }

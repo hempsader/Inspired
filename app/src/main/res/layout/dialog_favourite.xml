@@ -59,6 +59,7 @@
         android:layout_marginTop="16dp"
         android:fontFamily="@font/roboto"
         android:text="TextView"
+        android:textColor="@color/cardview_dark_background"
         app:layout_constraintBottom_toTopOf="@+id/imageButton_share"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

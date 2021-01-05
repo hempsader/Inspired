@@ -12,8 +12,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.inspired.R
 import com.example.inspired.model.QuoteResponse
 import com.example.inspired.util.UnfavouriteFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 
 class FavouriteList(private val clickedQuote: ClickedQuote?, private val clickFavourite: ClickFavourite) : RecyclerView.Adapter<FavouriteList.FavouriteHolder>(){
@@ -21,8 +26,11 @@ class FavouriteList(private val clickedQuote: ClickedQuote?, private val clickFa
 
     private var listQuotes = ArrayList<QuoteResponse.Quote>()
     fun setList(newQuoteList: List<QuoteResponse.Quote>){
-        listQuotes = newQuoteList as ArrayList<QuoteResponse.Quote>
-        notifyDataSetChanged()
+        val diff = DiffUtil.calculateDiff(FavListDiffUtill(listQuotes,newQuoteList))
+        listQuotes.clear()
+        listQuotes.addAll(newQuoteList)
+        diff.dispatchUpdatesTo(this)
+
     }
 
    inner class FavouriteHolder(itemView: View): RecyclerView.ViewHolder(itemView), View.OnClickListener {
@@ -40,12 +48,9 @@ class FavouriteList(private val clickedQuote: ClickedQuote?, private val clickFa
             favourite = itemView.findViewById(R.id.imageView_favourite)
             favourite.setOnClickListener {
                 clickedFavourite.sendQuoteFavourite(listQuotes[adapterPosition])
-                UnfavouriteFlow.initialise()
-                UnfavouriteFlow.emitFavourite(listQuotes[adapterPosition])
+                val flowStr = ConflatedBroadcastChannel<String>()
                 GlobalScope.launch {
-                    UnfavouriteFlow.readFavourite().collect {
-                        Log.d("xx", it.toString())
-                    }
+                     UnfavouriteFlow.emitFavourite(listQuotes[adapterPosition].id)
                 }
             }
             author = itemView.findViewById(R.id.author_favourite)

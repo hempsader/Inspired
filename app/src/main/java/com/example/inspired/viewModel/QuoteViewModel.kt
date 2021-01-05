@@ -23,23 +23,23 @@ class QuoteViewModel(private val repository: QuoteRepositoryImpl,private val cor
     fun observerLocalQuote(): LiveData<ResponseQuoteRandom> = quoteLocalMutableData
 
 
-    fun fetchQuoteRemote(){
-        viewModelScope.launch(context = coroutineScope) {
-            try {
-                val quoteResponse = repository.randomQuote()
-                if (quoteResponse.isSuccessful) {
-                    quoteMutableData.postValue(
-                        ResponseQuoteRandom.ResponseSuccesfull(
-                            quoteResponse.body()?.quote?.get(
-                                0
+    fun fetchQuoteRemote() {
+            viewModelScope.launch(context = coroutineScope) {
+                try {
+                    val quoteResponse = repository.randomQuote()
+                    if (quoteResponse.isSuccessful) {
+                        quoteMutableData.postValue(
+                            ResponseQuoteRandom.ResponseSuccesfull(
+                                quoteResponse.body()?.quote?.get(
+                                    0
+                                )
                             )
                         )
-                    )
+                    }
+                } catch (e: Exception) {
+                    quoteMutableData.postValue(ResponseQuoteRandom.ResponseUnsuccessfull(e.stackTrace.toString()))
                 }
-            } catch (e: Exception) {
-                quoteMutableData.postValue(ResponseQuoteRandom.ResponseUnsuccessfull(e.stackTrace.toString()))
             }
-        }
     }
 
 

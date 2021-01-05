@@ -7,6 +7,13 @@
         android:enabled="true"
         android:summaryOff="Offline quote catch OFF"
         />
+    <SwitchPreferenceCompat
+        app:key="offline"
+        android:defaultValue="false"
+        android:summaryOn="Offline fetch ON"
+        android:enabled="true"
+        android:summaryOff="Offline fetch OFF"
+        />
     <ListPreference
         android:defaultValue="1"
         android:entries="@array/sortBy"

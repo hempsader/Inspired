@@ -1,6 +1,7 @@
 package com.example.inspired.view
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.ConnectivityManager
@@ -30,15 +31,13 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 import kotlinx.android.synthetic.main.main_fragment.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
 
-class FragmentRandom : VisibleFragment(){
+class FragmentRandom : VisibleFragment() {
     private lateinit var inspireMeButton: MaterialButton
     private lateinit var shareImage: MaterialButton
     private lateinit var progress: ProgressBar
@@ -56,7 +55,7 @@ class FragmentRandom : VisibleFragment(){
         ViewModelProvider(this, object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 return QuoteViewModel(
-                    QuoteRepositoryImpl(requireContext()),
+                    QuoteRepositoryImpl(),
                     Dispatchers.IO + Job()
                 ) as T
             }
@@ -82,51 +81,54 @@ class FragmentRandom : VisibleFragment(){
         mainLayout = view.findViewById(R.id.mainLayout)
         category = view.findViewById(R.id.category)
 
-        if(savedInstanceState != null){
+        if (savedInstanceState != null) {
             val id = savedInstanceState.getString("quote_id")
             val text = savedInstanceState.getString("quote_text")
             val author = savedInstanceState.getString("quote_author")
             val favourite = savedInstanceState.getBoolean("quote_favourite")
             val category = savedInstanceState.getString("quote_category")
-            val quote = QuoteResponse.Quote(id!!,text!!,author!!,favourite, category!!)
+            val quote = QuoteResponse.Quote(id!!, text!!, author!!, favourite, category!!)
             quoteUI(quote)
-        }else{
+        } else {
             firstTimeFetch()
         }
-        viewModel.observeRemoteQuote().observe(viewLifecycleOwner, Observer {
-            if(internetConnection() == NetworkInfo.DetailedState.VERIFYING_POOR_LINK){
-                viewModel.fetchLocalQuote()
-            }
-            if (it is ResponseQuoteRandom.ResponseSuccesfull) {
-                if (it.quote != null) {
-                    quote = it.quote
-                    quoteUI(it.quote)
-                    favourite(it.quote!!)
-                    shareQuote(it.quote)
-                    if (UtilPreferences.roomEnable(requireContext())) {
-                        if(!lowMemoryDetect()) {
-                            viewModel.insertOfflineQuote(it.quote)
-                        }else{
-                            snack("Low memory, fetching offline!")
-                            viewModel.fetchLocalQuote()
+            viewModel.observeRemoteQuote().observe(viewLifecycleOwner, Observer {
+                if (it is ResponseQuoteRandom.ResponseSuccesfull) {
+                    if (it.quote != null) {
+                        quote = it.quote
+                        quoteUI(it.quote)
+                        favouriteImageView.setOnClickListener {view->
+                            favourite(it.quote!!)
                         }
+                        shareImage.setOnClickListener {view->
+                            shareQuote(it.quote)
+                        }
+                        if (UtilPreferences.roomEnable()) {
+                            if (!lowMemoryDetect()) {
+                                viewModel.insertOfflineQuote(it.quote)
+                            } else {
+                                snack("Low memory, fetching offline!")
+                                viewModel.fetchLocalQuote()
+                            }
+                        }
+                        if (it.quote?.favourite!!) favouriteImageView.setIconResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImageView.setIconResource(
+                            R.drawable.ic_outline_favorite_border_24_false
+                        )
                     }
-                    if (it.quote?.favourite!!) favouriteImageView.setIconResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImageView.setIconResource(
-                        R.drawable.ic_outline_favorite_border_24_false
-                    )
                 }
-            }
-            if (it is ResponseQuoteRandom.ResponseUnsuccessfull) {
-                snack("Ooops...something is wrong with the remote server!")
-                viewModel.fetchLocalQuote()
-            }
-        })
+                if (it is ResponseQuoteRandom.ResponseUnsuccessfull) {
+                    snack("Ooops...something is wrong with the remote server!")
+                    viewModel.fetchLocalQuote()
+                }
+            })
 
         viewModel.observerLocalQuote().observe(viewLifecycleOwner, Observer {
             if (it is ResponseQuoteRandom.ResponseSuccesfull) {
                 quote = it.quote
                 quoteUI(it.quote!!)
-                favourite(it.quote)
+                favouriteImageView.setOnClickListener {view->
+                    favourite(it.quote)
+                }
                 if (it.quote?.favourite!!) favouriteImageView.setIconResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImageView.setIconResource(
                     R.drawable.ic_outline_favorite_border_24_false
                 )
@@ -140,18 +142,23 @@ class FragmentRandom : VisibleFragment(){
             }
         })
 
+        inspireMeButton.setOnClickListener {
+            fetchclick()
+        }
+
         unfavouriteUI()
         randomGradient()
         firstTimeRunNotif()
-        fetchclick()
         return view
     }
 
-    private fun unfavouriteUI(){
-        UnfavouriteFlow.initialise()
-        viewLifecycleOwner.lifecycleScope.launch() {
-            UnfavouriteFlow.readFavourite().collect {
-                Log.d("xx", it)
+    // TODO
+    private fun unfavouriteUI() {
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
+            UnfavouriteFlow.readFavourite().asFlow().collect {
+                if (quote?.id == it) {
+                    favouriteImageView.setIconResource(R.drawable.ic_outline_favorite_border_24_false)
+                }
             }
         }
     }
@@ -164,11 +171,11 @@ class FragmentRandom : VisibleFragment(){
         outState.putString("quote_category", quote?.category)
     }
 
-    private fun lowMemoryDetect(): Boolean{
+    private fun lowMemoryDetect(): Boolean {
         return requireContext().cacheDir.usableSpace * 100 / requireContext().cacheDir.totalSpace <= 10
     }
 
-    private fun loadingQuoteUI(){
+    private fun loadingQuoteUI() {
         progress.visibility = View.VISIBLE
         inspireMeButton.visibility = View.GONE
         shareImage.visibility = View.GONE
@@ -180,7 +187,7 @@ class FragmentRandom : VisibleFragment(){
         category.visibility = View.GONE
     }
 
-    private fun quoteUI(quote: QuoteResponse.Quote){
+    private fun quoteUI(quote: QuoteResponse.Quote) {
         progress.visibility = View.GONE
         inspireMeButton.visibility = View.VISIBLE
         category.visibility = View.VISIBLE
@@ -191,14 +198,14 @@ class FragmentRandom : VisibleFragment(){
         cardVIewButtons.visibility = View.VISIBLE
         cardViewMainText.visibility = View.VISIBLE
         randomGradient()
-        if(quote != null){
+        if (quote != null) {
             quoteText.text = quote.text
             quoteAuthor.text = quote.author
             category.text = "#${quote.category}"
         }
     }
 
-    private fun randomGradient(){
+    private fun randomGradient() {
         val rnd = Random
         val colors = IntArray(3)
         colors[0] = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256))
@@ -213,40 +220,46 @@ class FragmentRandom : VisibleFragment(){
     }
 
     private fun favourite(quote: QuoteResponse.Quote) {
-        favouriteImageView.setOnClickListener {
-
-            if(!lowMemoryDetect()) {
+            if (!lowMemoryDetect()) {
                 quote.favourite = !quote.favourite
                 if (quote.favourite) favouriteImageView.setIconResource(R.drawable.ic_baseline_favorite_24_true) else favouriteImageView.setIconResource(
                     R.drawable.ic_outline_favorite_border_24_false
                 )
                 viewModel.insertOfflineQuote(quote)
                 viewModel.favouriteQuote(quote)
-            }else{
+            } else {
                 snack("Cannot insert to favourites, low data storage!")
             }
-        }
     }
 
 
     private fun shareQuote(quote: QuoteResponse.Quote) {
-        imageShare.setOnClickListener {
-            val share = ShareQuote(requireContext())
-            share.quote(quote)
+            val shareQuote = Intent().apply{
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, quote.text + " - " + quote.author)
+                type = "text/plain"
+            }
+            requireContext().startActivity(Intent.createChooser(shareQuote,"Inspired Quote"))
         }
-    }
+
 
     private fun snack(message: String) {
         Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
     }
 
 
-    private fun firstTimeFetch(){
-        val manager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        when(manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!){
+    private fun firstTimeFetch() {
+        val manager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        when (manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!) {
             true -> {
-                viewModel.fetchQuoteRemote()
-                loadingQuoteUI()
+                if (!UtilPreferences.offlineFetch()!!) {
+                    viewModel.fetchQuoteRemote()
+                    loadingQuoteUI()
+                } else {
+                    viewModel.fetchLocalQuote()
+                    loadingQuoteUI()
+                }
             }
             false -> {
                 viewModel.fetchLocalQuote()
@@ -255,34 +268,35 @@ class FragmentRandom : VisibleFragment(){
         }
     }
 
-    private fun firstTimeRunNotif(){
-        if(UtilPreferences.scheduleNewWork(requireContext())) {
-            UtilPreferences.dailyMinuteSet(requireContext(),0)
+    private fun firstTimeRunNotif() {
+        if (UtilPreferences.scheduleNewWork()) {
+            UtilPreferences.dailyMinuteSet( 0)
             val randomHour = Random.nextInt(8, 20)
-            val randomMinute =  Random.nextInt(0, 59)
-            UtilPreferences.dailyHourSet(requireContext(), randomHour)
-            UtilPreferences.dailyMinuteSet(requireContext(),randomMinute)
-            if(UtilPreferences.dailyEnable(requireContext())) {
+            val randomMinute = Random.nextInt(0, 59)
+            UtilPreferences.dailyHourSet( randomHour)
+            UtilPreferences.dailyMinuteSet( randomMinute)
+            if (UtilPreferences.dailyEnable()) {
                 NotificationWorkStart.cancelFetchJob(requireContext())
                 NotificationWorkStart.start(
                     requireContext(),
-                    UtilPreferences.dailyHour(requireContext()),
-                    UtilPreferences.dailyMinute(requireContext())
+                    UtilPreferences.dailyHour(),
+                    UtilPreferences.dailyMinute()
                 )
             }
-            if(AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(requireContext())) {
-                PowerOptimisationForNotif.enableAutoStart(requireContext(),UtilPreferences.scheduleNewWork(requireContext()))
+            if (AutoStartPermissionHelper.getInstance()
+                    .isAutoStartPermissionAvailable(requireContext())
+            ) {
+                PowerOptimisationForNotif.enableAutoStart(
+                    requireContext(),
+                    UtilPreferences.scheduleNewWork()
+                )
             }
-            PowerOptimisationForNotif.disableBatterySaverForThisApp(requireContext(), UtilPreferences.scheduleNewWork(requireContext()))
-            UtilPreferences.scheduleNewWorkSet(requireContext(), false)
+            PowerOptimisationForNotif.disableBatterySaverForThisApp(
+                requireContext(),
+                UtilPreferences.scheduleNewWork()
+            )
+            UtilPreferences.scheduleNewWorkSet( false)
         }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.M)
-    private fun internetConnection(): NetworkInfo.DetailedState? {
-        val connectivity = requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val info = connectivity.activeNetworkInfo
-        return info?.detailedState
     }
 
 
@@ -291,12 +305,16 @@ class FragmentRandom : VisibleFragment(){
     @InternalCoroutinesApi
     private fun fetchclick() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            InternetUtil.getState().collectLatest {state ->
-                inspireMeButton.setOnClickListener {
+            InternetUtil.getState().collectLatest { state ->
                     when (state) {
                         State.CONNECTED -> {
-                            loadingQuoteUI()
-                            viewModel.fetchQuoteRemote()
+                            if (!UtilPreferences.offlineFetch()!!) {
+                                viewModel.fetchQuoteRemote()
+                                loadingQuoteUI()
+                            } else {
+                                viewModel.fetchLocalQuote()
+                                loadingQuoteUI()
+                            }
                         }
                         State.DISSCONNECTED -> {
                             loadingQuoteUI()
@@ -304,11 +322,8 @@ class FragmentRandom : VisibleFragment(){
                         }
                     }
                 }
-            }
         }
     }
-
-
 }
 
 

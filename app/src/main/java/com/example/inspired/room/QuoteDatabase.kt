@@ -14,12 +14,15 @@ abstract class QuoteDatabase : RoomDatabase(){
         private var INSTANCE: QuoteDatabase? = null
         fun instance(context: Context): QuoteDatabase? {
             synchronized(Any()){
-                if(INSTANCE == null) {
+                return if(INSTANCE == null) {
                     val db = Room.databaseBuilder(context,QuoteDatabase::class.java,"quote_db").fallbackToDestructiveMigration().build()
                     INSTANCE = db
+                    INSTANCE
+                }else{
+                    INSTANCE
                 }
             }
-            return INSTANCE
         }
+        fun instanceGet() = INSTANCE
     }
 }

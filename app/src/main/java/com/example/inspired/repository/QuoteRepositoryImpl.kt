@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
-class QuoteRepositoryImpl(context: Context): QuoteRepository{
-    private val dao = QuoteDatabase.instance(context)?.quoteDao()
+class QuoteRepositoryImpl(): QuoteRepository{
+    private val dao = QuoteDatabase.instanceGet()?.quoteDao()
 
     override suspend fun insertQuote(quote: QuoteResponse.Quote) {
         dao?.insert(quote)

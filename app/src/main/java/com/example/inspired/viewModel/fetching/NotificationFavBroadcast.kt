@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class NotificationFavBroadcast : BroadcastReceiver(){
     override fun onReceive(context: Context?, intent: Intent?) {
-        val repo = QuoteRepositoryImpl(context!!)
+        val repo = QuoteRepositoryImpl()
         val scope = CoroutineScope(Dispatchers.IO + Job())
         if(intent?.extras != null){
             val id = intent.getStringExtra("id")

@@ -34,7 +34,7 @@ class Fetching(private val context: Context, private val params: WorkerParameter
     @InternalCoroutinesApi
     private fun fetchQuote() {
         val coroutineScope = CoroutineScope(Job() + Dispatchers.IO)
-        val repository = QuoteRepositoryImpl(context)
+        val repository = QuoteRepositoryImpl()
         when (checkInternet()) {
             true -> {
                 try {

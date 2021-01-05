@@ -16,7 +16,9 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.example.inspired.room.QuoteDatabase
 import com.example.inspired.util.InternetUtil
+import com.example.inspired.util.UnfavouriteFlow
 import com.example.inspired.util.UtilPreferences
 import com.example.inspired.viewModel.fetching.NotificationWorkStart
 import com.judemanutd.autostarter.AutoStartPermissionHelper
@@ -25,6 +27,7 @@ import com.squareup.leakcanary.RefWatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlin.random.Random
 
 
@@ -39,7 +42,10 @@ class GlobalApp : Application() {
        val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         InternetUtil.initialise(applicationContext, applicationScope)
         InternetUtil.registerBroadCast()
+
         LeakCanary.install(this)
+        QuoteDatabase.instance(applicationContext)
+        UtilPreferences.context = applicationContext
         notif()
     }
 
