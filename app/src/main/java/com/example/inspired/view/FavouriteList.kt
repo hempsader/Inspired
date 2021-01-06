@@ -48,9 +48,8 @@ class FavouriteList(private val clickedQuote: ClickedQuote?, private val clickFa
             favourite = itemView.findViewById(R.id.imageView_favourite)
             favourite.setOnClickListener {
                 clickedFavourite.sendQuoteFavourite(listQuotes[adapterPosition])
-                val flowStr = ConflatedBroadcastChannel<String>()
                 GlobalScope.launch {
-                     UnfavouriteFlow.emitFavourite(listQuotes[adapterPosition].id)
+                     UnfavouriteFlow.emitFavourite(listQuotes[adapterPosition])
                 }
             }
             author = itemView.findViewById(R.id.author_favourite)

@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 object UnfavouriteFlow  {
-    private val flowStr  = ConflatedBroadcastChannel<String>()
+    private val flowStr  = ConflatedBroadcastChannel<QuoteResponse.Quote>()
 
-         suspend fun emitFavourite(quoteId: String) {
-            flowStr?.send(quoteId)
+         suspend fun emitFavourite(quote: QuoteResponse.Quote) {
+            flowStr?.send(quote)
             }
 
          fun readFavourite() = flowStr

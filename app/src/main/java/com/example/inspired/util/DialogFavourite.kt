@@ -19,12 +19,8 @@ import com.example.inspired.model.QuoteResponse
 import com.google.android.material.button.MaterialButton
 import kotlinx.android.synthetic.main.dialog_favourite.*
 
-class DialogFavourite: DialogFragment(){
+class DialogFavourite(private val quote: QuoteResponse.Quote): DialogFragment(){
 
-    private var quote: QuoteResponse.Quote? = null
-    fun quote(quote: QuoteResponse.Quote){
-        this.quote = quote
-    }
 
     override fun onStart() {
         super.onStart()
@@ -40,7 +36,6 @@ class DialogFavourite: DialogFragment(){
     ): View? {
         dialog!!.window?.setBackgroundDrawableResource(R.drawable.dialog_shape);
         val view = inflater.inflate(R.layout.dialog_favourite,container,false)
-
         val dialogText = view.findViewById<TextView>(R.id.dialog_text)
         val dialogAuthor = view.findViewById<TextView>(R.id.dialog_author)
         val dialogCategory = view.findViewById<TextView>(R.id.dialog_category)

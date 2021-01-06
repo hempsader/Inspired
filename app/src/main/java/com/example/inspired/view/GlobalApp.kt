@@ -34,13 +34,12 @@ import kotlin.random.Random
 const val NOTIFICATION_CHANNEL_ID = "quote"
 
 class GlobalApp : Application() {
-
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
        val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
         InternetUtil.initialise(applicationContext, applicationScope)
+        QuoteDatabase.instance(applicationContext)
         InternetUtil.registerBroadCast()
 
         LeakCanary.install(this)

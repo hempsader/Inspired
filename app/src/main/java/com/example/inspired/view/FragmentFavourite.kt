@@ -58,6 +58,7 @@ class FragmentFavourite : VisibleFragment(), ClickedQuote,
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.favouriteMutableLiveData.observe(viewLifecycleOwner, Observer {list->
+                    sort(UtilPreferences.sortType(), list)
                        adapterFavourites?.setList(list)
             swipeLayout?.setOnRefreshListener(object: SwipeRefreshLayout.OnRefreshListener{
                 override fun onRefresh() {
@@ -76,11 +77,10 @@ class FragmentFavourite : VisibleFragment(), ClickedQuote,
 
 
     override fun sendQuote(quote: QuoteResponse.Quote) {
-        var dialog: DialogFavourite? = null
         if (quote != null) {
-            dialog = DialogFavourite()
-            dialog?.quote(quote)
-            dialog?.show(childFragmentManager, "tag")
+            requireActivity().supportFragmentManager.beginTransaction()
+                .add(DialogFavourite(quote), "tag")
+                .commit()
         }
     }
 

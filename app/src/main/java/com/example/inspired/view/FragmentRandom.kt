@@ -152,11 +152,12 @@ class FragmentRandom : VisibleFragment() {
         return view
     }
 
-    // TODO
+
     private fun unfavouriteUI() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
             UnfavouriteFlow.readFavourite().asFlow().collect {
-                if (quote?.id == it) {
+                if (quote?.id == it.id) {
+                    quote?.favourite = false
                     favouriteImageView.setIconResource(R.drawable.ic_outline_favorite_border_24_false)
                 }
             }
