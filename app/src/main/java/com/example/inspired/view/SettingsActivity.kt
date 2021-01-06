@@ -9,10 +9,12 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.util.Log
 import android.view.MenuItem
 import android.widget.TimePicker
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
@@ -89,7 +91,7 @@ class SettingsActivity : AppCompatActivity() {
             val sortList = findPreference<ListPreference>("sortBy_list")
             val offlineFetch = findPreference<SwitchPreferenceCompat>("offline")
 
-            room?.setOnPreferenceChangeListener { preference, newValue ->
+            room?.setOnPreferenceChangeListener { _, _ ->
                 if(room.isChecked){
                     room.isChecked = false
                     UtilPreferences.roomEnableSet(false)
@@ -161,7 +163,7 @@ class SettingsActivity : AppCompatActivity() {
                     NotificationWorkStart.cancelFetchJob(requireContext())
                 }else{
                     daily.isChecked = true
-                    hour?.isEnabled = true
+                    hour.isEnabled = true
                     autostart?.isEnabled = true
                     batterySaver?.isEnabled = true
                     UtilPreferences.dailyEnableSet(true)
@@ -218,15 +220,37 @@ class SettingsActivity : AppCompatActivity() {
                 return TimePickerDialog(activity, this, hour,minute , true)
             }
 
+
             override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
                 UtilPreferences.dailyHourSet( hourOfDay)
                 UtilPreferences.dailyMinuteSet( minute)
                 val hour = if (hourOfDay < 10) "0${hourOfDay}" else "${hourOfDay}"
                 val minute = if (minute < 10) "0${minute}" else "${minute}"
                 time.title = "Notification time around: $hour:$minute"
-                if(!UtilPreferences.scheduleNewWork()) {
-                    NotificationWorkStart.cancelFetchJob(requireContext())
-                    NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(), UtilPreferences.dailyMinute())
+
+
+                if(Build.VERSION.SDK_INT >= 23) {
+                    val powerManager = context?.getSystemService(Context.POWER_SERVICE) as PowerManager
+                    if (!powerManager.isIgnoringBatteryOptimizations(context?.packageName)) {
+                        PowerOptimisationForNotif.disableBatterySaverForThisApp(
+                            requireContext(),
+                            true
+                        )
+                        if(!UtilPreferences.scheduleNewWork()) {
+                            NotificationWorkStart.cancelFetchJob(requireContext())
+                            NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(), UtilPreferences.dailyMinute())
+                        }
+                    }
+
+                }else {
+                    if (!UtilPreferences.scheduleNewWork()) {
+                        NotificationWorkStart.cancelFetchJob(requireContext())
+                        NotificationWorkStart.start(
+                            requireContext(),
+                            UtilPreferences.dailyHour(),
+                            UtilPreferences.dailyMinute()
+                        )
+                    }
                 }
             }
         }

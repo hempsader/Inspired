@@ -8,7 +8,6 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.LifecycleCoroutineScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
 import kotlinx.coroutines.flow.Flow
@@ -74,14 +73,17 @@ class InternetUtil {
 
 
 
+        @FlowPreview
+        @ExperimentalCoroutinesApi
         @InternalCoroutinesApi
         fun getState(): Flow<State> {
             return flow.asFlow()
         }
 
+        @ExperimentalCoroutinesApi
         private fun checking(context: Context, coroutineScope: CoroutineScope) {
             if (Build.VERSION.SDK_INT >= 24) {
-                checkInternetFlow(context, coroutineScope!!)
+                checkInternetFlow(context, coroutineScope)
             }
             if (Build.VERSION.SDK_INT < 24) {
                 checkInternetBroadcast(context)
@@ -89,6 +91,7 @@ class InternetUtil {
         }
 
         //Api >= 24
+        @ExperimentalCoroutinesApi
         @RequiresApi(Build.VERSION_CODES.N)
         private fun checkInternetFlow(
             context: Context,
