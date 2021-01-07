@@ -9,6 +9,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import com.example.inspired.R
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 
 class PowerOptimisationForNotif {
@@ -20,14 +21,14 @@ class PowerOptimisationForNotif {
                             .getAutoStartPermission(context)
                     ) {
                         AlertDialog.Builder(context)
-                            .setTitle("Enable Auto-Start")
-                            .setMessage("In order to receive daily Quote notification, please enable Auto-Start. You also can change this setting in app settings. This setting will not affect battery life!")
-                            .setPositiveButton("Enable") { dialog, _ ->
+                            .setTitle(R.string.autostart_dialog_title)
+                            .setMessage(R.string.autostart_dialog_message)
+                            .setPositiveButton(R.string.autostart_dialog_button) { dialog, _ ->
                                 dialog.dismiss()
                                 if(AutoStartPermissionHelper.getInstance().getAutoStartPermission(context)){
-                                    Toast.makeText(context, "Auto-Start enabled!", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, R.string.autostart_toast_enable, Toast.LENGTH_LONG).show()
                                 }else{
-                                    Toast.makeText(context, "Auto-Start not enabled! Missing feature (NOTIF ON) or aborted by user (NOTIF OFF) ", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, R.string.autostart_toast_disabled, Toast.LENGTH_LONG).show()
                                 }
                             }.show()
                     }
@@ -38,9 +39,9 @@ class PowerOptimisationForNotif {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (firstTime) {
                         AlertDialog.Builder(context)
-                            .setTitle("Battery Saver")
-                            .setMessage("In order to receive daily Quote notification when battery saver is ON, disable battery saver for this app. You can change this setting in app settings. After dismiss, pop-up for enable run in background should appear, if not, already enabled. This setting will not affect battery life!")
-                            .setNeutralButton("Dismiss") { dialog, _ ->
+                            .setTitle(R.string.battery_saver_title)
+                            .setMessage(R.string.battery_saver_message)
+                            .setNeutralButton(R.string.battery_saver_dismiss) { dialog, _ ->
                                 dialog.dismiss()
                                 val intent = Intent()
                                 val packageName = context?.packageName

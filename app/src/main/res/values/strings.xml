@@ -17,4 +17,15 @@
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
     <string name="title_activity_settings2">SettingsActivity2</string>
+    <string name="autostart_dialog_title">Enable Auto-Start</string>
+    <string name="autostart_dialog_message">In order to receive daily Quote notification, please enable Auto-Start. You also can change this setting in app settings. This setting will not affect battery life!</string>
+    <string name="autostart_toast_enable">Auto-Start enabled!</string>
+    <string name="autostart_toast_disabled">Auto-Start not enabled! Missing feature (NOTIF ON) or aborted by user (NOTIF OFF)</string>
+    <string name="autostart_dialog_button">Enable</string>
+    <string name="battery_saver_title">Battery Saver</string>
+    <string name="battery_saver_message">In order to receive daily Quote notification when battery saver is ON, disable battery saver for this app. You can change this setting in app settings. After dismiss, pop-up for enable run in background should appear, if not, already enabled. This setting will not affect battery life!</string>
+    <string name="battery_saver_dismiss">Dismiss</string>
+
+
+
 </resources>
