@@ -1,5 +1,6 @@
 package com.example.inspired.util
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -7,19 +8,13 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import com.example.inspired.R
 import com.judemanutd.autostarter.AutoStartPermissionHelper
 
-class PowerOptimisationForNotif {
-    companion object{
+object PowerOptimisationForNotif {
         fun enableAutoStart(context: Context, firstTime: Boolean) {
             if (firstTime) {
-                if(AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(context)) {
-                    if (!AutoStartPermissionHelper.getInstance()
-                            .getAutoStartPermission(context)
-                    ) {
                         AlertDialog.Builder(context)
                             .setTitle(R.string.autostart_dialog_title)
                             .setMessage(R.string.autostart_dialog_message)
@@ -31,10 +26,9 @@ class PowerOptimisationForNotif {
                                     Toast.makeText(context, R.string.autostart_toast_disabled, Toast.LENGTH_LONG).show()
                                 }
                             }.show()
-                    }
-                }
             }
         }
+        @SuppressLint("BatteryLife")
         fun disableBatterySaverForThisApp(context: Context, firstTime: Boolean){
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (firstTime) {
@@ -44,9 +38,8 @@ class PowerOptimisationForNotif {
                             .setNeutralButton(R.string.battery_saver_dismiss) { dialog, _ ->
                                 dialog.dismiss()
                                 val intent = Intent()
-                                val packageName = context?.packageName
-                                val pm =
-                                    context?.getSystemService(Context.POWER_SERVICE) as PowerManager
+                                val packageName = context.packageName
+                                val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
                                 if (!pm.isIgnoringBatteryOptimizations(packageName)) {
                                     intent.action =
                                         Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
@@ -57,5 +50,4 @@ class PowerOptimisationForNotif {
                     }
                 }
         }
-    }
 }

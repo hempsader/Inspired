@@ -1,6 +1,5 @@
 package com.example.inspired.repository
 
-import androidx.lifecycle.LiveData
 import com.example.inspired.model.QuoteResponse
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response

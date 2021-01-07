@@ -1,19 +1,12 @@
 package com.example.inspired.repository
 
-import android.content.Context
-import android.util.Log
-import androidx.lifecycle.LiveData
 import com.example.inspired.api.QuoteApi
 import com.example.inspired.model.QuoteResponse
 import com.example.inspired.room.QuoteDatabase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 
-class QuoteRepositoryImpl(): QuoteRepository{
+class QuoteRepositoryImpl: QuoteRepository{
     private val dao = QuoteDatabase.instanceGet()?.quoteDao()
 
     override suspend fun insertQuote(quote: QuoteResponse.Quote) {

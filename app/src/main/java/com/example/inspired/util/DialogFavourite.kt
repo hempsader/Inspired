@@ -1,23 +1,17 @@
 package com.example.inspired.util
 
-import android.app.AlertDialog
-import android.app.Dialog
-import android.content.Context
-import android.content.DialogInterface
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.example.inspired.R
 import com.example.inspired.model.QuoteResponse
 import com.google.android.material.button.MaterialButton
-import kotlinx.android.synthetic.main.dialog_favourite.*
 
 class DialogFavourite(private val quote: QuoteResponse.Quote): DialogFragment(){
 
@@ -29,12 +23,13 @@ class DialogFavourite(private val quote: QuoteResponse.Quote): DialogFragment(){
         dialog?.window?.setLayout(width,height)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        dialog!!.window?.setBackgroundDrawableResource(R.drawable.dialog_shape);
+        dialog!!.window?.setBackgroundDrawableResource(R.drawable.dialog_shape)
         val view = inflater.inflate(R.layout.dialog_favourite,container,false)
         val dialogText = view.findViewById<TextView>(R.id.dialog_text)
         val dialogAuthor = view.findViewById<TextView>(R.id.dialog_author)
@@ -43,7 +38,7 @@ class DialogFavourite(private val quote: QuoteResponse.Quote): DialogFragment(){
             setOnClickListener {
                 val shareQuote = Intent().apply{
                     action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, quote?.text + " - " + quote?.author)
+                    putExtra(Intent.EXTRA_TEXT, quote.text + " - " + quote.author)
                     type = "text/plain"
                 }
                 requireContext().startActivity(Intent.createChooser(shareQuote,"Inspired Quote"))
@@ -54,9 +49,9 @@ class DialogFavourite(private val quote: QuoteResponse.Quote): DialogFragment(){
                 dialog?.dismiss()
             }
         }
-        dialogText.text = quote?.text
-        dialogAuthor.text = quote?.author
-        dialogCategory.text = "#"+quote?.category
+        dialogText.text = quote.text
+        dialogAuthor.text = quote.author
+        dialogCategory.text = "#"+quote.category
 
         return view
     }
