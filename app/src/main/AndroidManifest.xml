@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.inspired">
-    <permission android:name="com.example.inspired.PRIVATE"
+    package="com.ionut.grigore.inspired">
+    <permission android:name="com.ionut.grigore.inspired.PRIVATE"
         android:protectionLevel="signature"/>
     <permission
-        android:name="com.example.inspired.PRIVATE"
+        android:name="com.ionut.grigore.inspired.PRIVATE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="com.example.inspired.PRIVATE"/>
@@ -20,15 +19,16 @@
     <application
         android:name=".view.GlobalApp"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/icon_launcher"
         android:label="@string/app_name"
         android:installLocation="internalOnly"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@mipmap/icon_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:fullBackupContent="@xml/backup_descriptor">
         <activity
             android:name=".view.SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings" />
         <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,10 +37,10 @@
             </intent-filter>
         </activity>
         <receiver android:name=".viewModel.fetching.BroadcastAppForeground"
-            android:permission="com.example.inspired.PRIVATE"
+            android:permission="com.ionut.grigore.inspired.PRIVATE"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.example.inspired.SHOW_NOTIFICATION"/>
+                <action android:name="com.ionut.grigore.inspired.SHOW_NOTIFICATION"/>
             </intent-filter>
         </receiver>
         <receiver android:name=".viewModel.fetching.NotificationFavBroadcast" />
