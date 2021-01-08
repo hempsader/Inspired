@@ -10,6 +10,7 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
+import android.util.Log
 import android.view.MenuItem
 import android.widget.TimePicker
 import androidx.appcompat.app.AlertDialog
@@ -25,6 +26,7 @@ import com.ionut.grigore.inspired.util.UtilPreferences
 import com.ionut.grigore.inspired.viewModel.fetching.Fetching
 import com.ionut.grigore.inspired.viewModel.fetching.NotificationWorkStart
 import com.judemanutd.autostarter.AutoStartPermissionHelper
+import java.lang.IllegalStateException
 import java.util.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -223,7 +225,6 @@ class SettingsActivity : AppCompatActivity() {
                 val minute = if (minute < 10) "0${minute}" else "$minute"
                 time.title = "Notification time around: $hour:$minute"
 
-
                 if(Build.VERSION.SDK_INT >= 23) {
                     val powerManager = context?.getSystemService(Context.POWER_SERVICE) as PowerManager
                     if (!powerManager.isIgnoringBatteryOptimizations(context?.packageName)) {
@@ -231,9 +232,14 @@ class SettingsActivity : AppCompatActivity() {
                             requireContext(),
                             true
                         )
-                        if(!UtilPreferences.scheduleNewWork()) {
+                    }else {
+                        if (!UtilPreferences.scheduleNewWork()) {
                             NotificationWorkStart.cancelFetchJob(requireContext())
-                            NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(), UtilPreferences.dailyMinute())
+                            NotificationWorkStart.start(
+                                requireContext(),
+                                UtilPreferences.dailyHour(),
+                                UtilPreferences.dailyMinute()
+                            )
                         }
                     }
 

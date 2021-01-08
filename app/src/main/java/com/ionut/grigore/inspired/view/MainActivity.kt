@@ -7,9 +7,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.*
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.ionut.grigore.inspired.R
 import com.ionut.grigore.inspired.util.UtilPreferences
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.IllegalStateException
 
 
 class MainActivity : AppCompatActivity() {
@@ -19,8 +21,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         viewPager = findViewById(R.id.viewPager)
-
-
+        FirebaseAnalytics.getInstance(this)
         val pagerAdapter = ScreenSlidePagerAdapter(supportFragmentManager)
         viewPager.adapter = pagerAdapter
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{

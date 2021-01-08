@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1055108022110",
+    "project_id": "inspired-daeff",
+    "storage_bucket": "inspired-daeff.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1055108022110:android:426c5f2f784dff5767d9cf",
+        "android_client_info": {
+          "package_name": "com.ionut.grigore.inspired"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1055108022110-5rubk9c2ct61dq78t5pr69ti1e1lntjm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmCswszPoG8mcqlZ-MjD_cUNb26aNpcUk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1055108022110-5rubk9c2ct61dq78t5pr69ti1e1lntjm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -78,7 +78,7 @@ class Fetching(private val context: Context, params: WorkerParameters): Coroutin
     }
 
     companion object{
-        const val ACTION_SHOW_NOTIFICATION = "com.example.inspired.SHOW_NOTIFICATION"
-        const val PERM_PRIVATE = "com.example.inspired.PRIVATE"
+        const val ACTION_SHOW_NOTIFICATION = "com.ionut.grigore.inspired.SHOW_NOTIFICATION"
+        const val PERM_PRIVATE = "com.ionut.grigore.inspired.PRIVATE"
     }
 }

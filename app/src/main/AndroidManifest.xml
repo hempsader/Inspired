@@ -7,7 +7,7 @@
         android:name="com.ionut.grigore.inspired.PRIVATE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.example.inspired.PRIVATE"/>
+    <uses-permission android:name="com.ionut.grigore.inspired.PRIVATE"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="com.example.inspired.PRIVATE" />
@@ -21,7 +21,6 @@
         android:allowBackup="true"
         android:icon="@mipmap/icon_launcher"
         android:label="@string/app_name"
-        android:installLocation="internalOnly"
         android:roundIcon="@mipmap/icon_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
