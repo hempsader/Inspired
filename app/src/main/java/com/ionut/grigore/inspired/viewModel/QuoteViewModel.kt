@@ -1,5 +1,6 @@
 package com.ionut.grigore.inspired.viewModel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -34,7 +35,7 @@ class QuoteViewModel(private val repository: QuoteRepositoryImpl, private val co
                         )
                     }
                 } catch (e: Exception) {
-                    quoteMutableData.postValue(ResponseQuoteRandom.ResponseUnsuccessfull(e.stackTrace.toString()))
+                    quoteMutableData.postValue(ResponseQuoteRandom.ResponseUnsuccessfull(e.message.toString()))
                 }
             }
     }

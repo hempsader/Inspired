@@ -119,7 +119,7 @@ class FragmentRandom : VisibleFragment() {
                     }
                 }
                 if (it is ResponseQuoteRandom.ResponseUnsuccessfull) {
-                    snack(R.string.snack_server_problem.toString())
+                    snack(getString(R.string.snack_server_problem))
                     viewModel.fetchLocalQuote()
                 }
             })
@@ -136,18 +136,16 @@ class FragmentRandom : VisibleFragment() {
                 )
             }
             if (it is ResponseQuoteRandom.ResponseUnsuccessfull) {
+                cardViewMainText.visibility = View.VISIBLE
                 quoteText.visibility = View.VISIBLE
-                progress.visibility = View.GONE
+                quoteText.text = getString(R.string.no_fetched_quotes)
                 inspireMeButton.visibility = View.VISIBLE
-                quoteText.text = R.string.no_fetched_quotes.toString()
-                snack(it.string)
             }
         })
 
         inspireMeButton.setOnClickListener {
             fetchclick()
         }
-
         unfavouriteUI()
         randomGradient()
         firstTimeRunNotif()

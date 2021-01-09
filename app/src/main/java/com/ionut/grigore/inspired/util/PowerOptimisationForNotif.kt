@@ -21,10 +21,12 @@ object PowerOptimisationForNotif {
                             .setMessage(R.string.autostart_dialog_message)
                             .setPositiveButton(R.string.autostart_dialog_button) { dialog, _ ->
                                 dialog.dismiss()
-                                if(AutoStartPermissionHelper.getInstance().getAutoStartPermission(context)){
-                                    Toast.makeText(context, R.string.autostart_toast_enable, Toast.LENGTH_LONG).show()
-                                }else{
-                                    Toast.makeText(context, R.string.autostart_toast_disabled, Toast.LENGTH_LONG).show()
+                                if(!AutoStartPermissionHelper.getInstance().getAutoStartPermission(context)){
+                                    if(AutoStartPermissionHelper.getInstance().getAutoStartPermission(context)){
+                                        Toast.makeText(context, R.string.autostart_toast_enable, Toast.LENGTH_LONG).show()
+                                    }else{
+                                        Toast.makeText(context, R.string.autostart_toast_disabled, Toast.LENGTH_LONG).show()
+                                    }
                                 }
                             }.show()
             }

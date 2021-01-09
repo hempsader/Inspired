@@ -77,11 +77,11 @@ class SettingsActivity : AppCompatActivity() {
 
 
     class SettingsFragment : PreferenceFragmentCompat() {
-            private lateinit var hour: Preference
+        private lateinit var hour: Preference
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
             val room = findPreference<SwitchPreferenceCompat>("room")
-             hour = findPreference("hour")!!
+            hour = findPreference("hour")!!
             val daily = findPreference<SwitchPreferenceCompat>("daily_quote")
             val batterySaver = findPreference<Preference>("battery_saver")
             val autostart = findPreference<Preference>("autostart")
@@ -89,10 +89,10 @@ class SettingsActivity : AppCompatActivity() {
             val offlineFetch = findPreference<SwitchPreferenceCompat>("offline")
 
             room?.setOnPreferenceChangeListener { _, _ ->
-                if(room.isChecked){
+                if (room.isChecked) {
                     room.isChecked = false
                     UtilPreferences.roomEnableSet(false)
-                }else{
+                } else {
                     room.isChecked = true
                     UtilPreferences.roomEnableSet(true)
                 }
@@ -104,9 +104,10 @@ class SettingsActivity : AppCompatActivity() {
                 true
             }
 
-            hour.title = formatNotificationTime(UtilPreferences.dailyHour(), UtilPreferences.dailyMinute())
+            hour.title =
+                formatNotificationTime(UtilPreferences.dailyHour(), UtilPreferences.dailyMinute())
             batterySaver?.isVisible = false
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 batterySaver?.isVisible = true
                 batterySaver?.setOnPreferenceClickListener {
                     PowerOptimisationForNotif.disableBatterySaverForThisApp(requireContext(), true)
@@ -116,66 +117,73 @@ class SettingsActivity : AppCompatActivity() {
 
 
             offlineFetch?.setOnPreferenceClickListener {
-                if(offlineFetch.isChecked){
-                    UtilPreferences.offlineFetchSet( true)
+                if (offlineFetch.isChecked) {
+                    UtilPreferences.offlineFetchSet(true)
                     offlineFetch.isChecked = true
-                }else{
-                    UtilPreferences.offlineFetchSet( false)
+                } else {
+                    UtilPreferences.offlineFetchSet(false)
                     offlineFetch.isChecked = false
                 }
                 true
             }
 
             autostart?.isVisible = false
-            if(AutoStartPermissionHelper.getInstance().isAutoStartPermissionAvailable(requireContext())) {
+            if (AutoStartPermissionHelper.getInstance()
+                    .isAutoStartPermissionAvailable(requireContext())
+            ) {
                 autostart?.isVisible = true
-                 autostart?.setOnPreferenceClickListener {
+                autostart?.setOnPreferenceClickListener {
                     PowerOptimisationForNotif.enableAutoStart(requireContext(), true)
                     true
                 }
             }
             sortList?.title = sortTextString(UtilPreferences.sortType())
             sortList?.setOnPreferenceChangeListener { preference, newValue ->
-                    UtilPreferences.sortTypeSet(sortTextInt(newValue as String))
-                    sortList.title = sortTextString(UtilPreferences.sortType())
+                UtilPreferences.sortTypeSet(sortTextInt(newValue as String))
+                sortList.title = sortTextString(UtilPreferences.sortType())
                 false
             }
-            if(!daily?.isChecked!!){
+            if (!daily?.isChecked!!) {
                 hour.isEnabled = false
                 autostart?.isEnabled = false
                 batterySaver?.isEnabled = false
-            }else{
+            } else {
                 hour.isEnabled = true
                 autostart?.isEnabled = true
                 batterySaver?.isEnabled = true
             }
 
             daily.setOnPreferenceChangeListener { preference, newValue ->
-                if(daily.isChecked){
+                if (daily.isChecked) {
                     daily.isChecked = false
                     hour.isEnabled = false
                     autostart?.isEnabled = false
                     batterySaver?.isEnabled = false
                     UtilPreferences.dailyEnableSet(false)
                     NotificationWorkStart.cancelFetchJob(requireContext())
-                }else{
+                } else {
                     daily.isChecked = true
                     hour.isEnabled = true
                     autostart?.isEnabled = true
                     batterySaver?.isEnabled = true
                     UtilPreferences.dailyEnableSet(true)
                     NotificationWorkStart.cancelFetchJob(requireContext())
-                    NotificationWorkStart.start(requireContext(),UtilPreferences.dailyHour(), UtilPreferences.dailyMinute())
+                    NotificationWorkStart.start(
+                        requireContext(),
+                        UtilPreferences.dailyHour(),
+                        UtilPreferences.dailyMinute()
+                    )
                 }
                 true
             }
         }
-        private fun attention(context: Context){
-             AlertDialog.Builder(context)
+
+        private fun attention(context: Context) {
+            AlertDialog.Builder(context)
                 .setMessage(R.string.battery_attention)
-                .setNeutralButton("Dismiss") { dialog, _ ->
+                .setNeutralButton(R.string.battery_saver_dismiss) { dialog, _ ->
                     dialog.dismiss()
-                    TimePick(hour).show(parentFragmentManager,"setHour")
+                    TimePick(hour).show(parentFragmentManager, "setHour")
                 }.show()
         }
 
@@ -186,21 +194,22 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         private fun sortTextInt(sort: String): Int {
-           return when(sort){
+            return when (sort) {
                 "Category" -> {
-                   0
+                    0
                 }
-               "Text" -> {
-                  1
-               }
-               "Author" -> {
-                  2
-               }
-               else -> 0
-           }
+                "Text" -> {
+                    1
+                }
+                "Author" -> {
+                    2
+                }
+                else -> 0
+            }
         }
-        private fun sortTextString(sort: Int): String{
-            return when(sort){
+
+        private fun sortTextString(sort: Int): String {
+            return when (sort) {
                 CATEGORY -> "Sort by Category"
                 TEXT -> "Sort by Text"
                 AUTHOR -> "Sort by Author"
@@ -208,31 +217,43 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-         class TimePick(private val time: Preference): DialogFragment(), TimePickerDialog.OnTimeSetListener {
+        class TimePick(private val time: Preference) : DialogFragment(),
+            TimePickerDialog.OnTimeSetListener {
 
             override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
                 val c = Calendar.getInstance()
                 val hour = c.get(Calendar.HOUR_OF_DAY)
                 val minute = c.get(Calendar.MINUTE)
-                return TimePickerDialog(activity, this, hour,minute , true)
+                return TimePickerDialog(activity, this, hour, minute, true)
             }
 
 
             override fun onTimeSet(view: TimePicker?, hourOfDay: Int, minute: Int) {
-                UtilPreferences.dailyHourSet( hourOfDay)
-                UtilPreferences.dailyMinuteSet( minute)
+                UtilPreferences.dailyHourSet(hourOfDay)
+                UtilPreferences.dailyMinuteSet(minute)
                 val hour = if (hourOfDay < 10) "0${hourOfDay}" else "$hourOfDay"
                 val minute = if (minute < 10) "0${minute}" else "$minute"
                 time.title = "Notification time around: $hour:$minute"
 
-                if(Build.VERSION.SDK_INT >= 23) {
-                    val powerManager = context?.getSystemService(Context.POWER_SERVICE) as PowerManager
+                if (Build.VERSION.SDK_INT >= 23) {
+                    Log.d("xxx", "vvnnm")
+                    val powerManager =
+                        context?.getSystemService(Context.POWER_SERVICE) as PowerManager
                     if (!powerManager.isIgnoringBatteryOptimizations(context?.packageName)) {
                         PowerOptimisationForNotif.disableBatterySaverForThisApp(
                             requireContext(),
                             true
                         )
-                    }else {
+                    }
+                        if (!UtilPreferences.scheduleNewWork()) {
+                            NotificationWorkStart.cancelFetchJob(requireContext())
+                            NotificationWorkStart.start(
+                                requireContext(),
+                                UtilPreferences.dailyHour(),
+                                UtilPreferences.dailyMinute()
+                            )
+                    }
+                    } else {
                         if (!UtilPreferences.scheduleNewWork()) {
                             NotificationWorkStart.cancelFetchJob(requireContext())
                             NotificationWorkStart.start(
@@ -242,19 +263,7 @@ class SettingsActivity : AppCompatActivity() {
                             )
                         }
                     }
-
-                }else {
-                    if (!UtilPreferences.scheduleNewWork()) {
-                        NotificationWorkStart.cancelFetchJob(requireContext())
-                        NotificationWorkStart.start(
-                            requireContext(),
-                            UtilPreferences.dailyHour(),
-                            UtilPreferences.dailyMinute()
-                        )
-                    }
                 }
-            }
         }
     }
-
 }

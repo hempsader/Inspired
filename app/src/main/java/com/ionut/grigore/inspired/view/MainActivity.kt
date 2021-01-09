@@ -1,5 +1,6 @@
 package com.ionut.grigore.inspired.view
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -60,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         if (viewPager.currentItem == 0) {
             // If the user is currently looking at the first step, allow the system to handle the
             // Back button. This calls finish() on this activity and pops the back stack.
-            super.onBackPressed()
+            finishAfterTransition()
         } else {
             // Otherwise, select the previous step.
             viewPager.currentItem = viewPager.currentItem - 1

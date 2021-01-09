@@ -10,11 +10,11 @@ data class QuoteResponse(@SerializedName("data") val quote: List<Quote>) {
     @Entity(tableName = "quote_db")
     data class Quote(
         @PrimaryKey
-        @SerializedName("_id") val id: String,
-        @SerializedName("quoteText") val text: String,
-        @SerializedName("quoteAuthor") val author: String,
+        @SerializedName("_id") val id: String = "xxx",
+        @SerializedName("quoteText") val text: String = "Ooops..no quote fetched",
+        @SerializedName("quoteAuthor") val author: String = "Unknown Author",
         var favourite: Boolean = false,
-        @SerializedName("quoteGenre") val category: String
+        @SerializedName("quoteGenre") val category: String = "Unknown"
     )
 
 }
