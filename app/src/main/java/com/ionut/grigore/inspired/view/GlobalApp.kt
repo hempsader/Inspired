@@ -1,5 +1,6 @@
 package com.ionut.grigore.inspired.view
 
+
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -9,8 +10,6 @@ import androidx.annotation.RequiresApi
 import com.ionut.grigore.inspired.room.QuoteDatabase
 import com.ionut.grigore.inspired.util.InternetUtil
 import com.ionut.grigore.inspired.util.UtilPreferences
-
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,6 +27,7 @@ class GlobalApp : Application() {
         UtilPreferences.context = applicationContext
         InternetUtil.registerBroadCast()
         notif()
+
     }
 
 

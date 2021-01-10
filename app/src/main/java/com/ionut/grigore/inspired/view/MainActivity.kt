@@ -1,18 +1,18 @@
 package com.ionut.grigore.inspired.view
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.*
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.ionut.grigore.inspired.R
 import com.ionut.grigore.inspired.util.UtilPreferences
 import kotlinx.android.synthetic.main.activity_main.*
-import java.lang.IllegalStateException
 
 
 class MainActivity : AppCompatActivity() {
@@ -20,25 +20,29 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        viewPager = findViewById(R.id.viewPager)
-        FirebaseAnalytics.getInstance(this)
-        val pagerAdapter = ScreenSlidePagerAdapter(supportFragmentManager)
-        viewPager.adapter = pagerAdapter
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                viewPager.currentItem = tab?.position!!
-            }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
+            setContentView(R.layout.activity_main)
+            viewPager = findViewById(R.id.viewPager)
+            FirebaseAnalytics.getInstance(this)
+            val pagerAdapter = ScreenSlidePagerAdapter(supportFragmentManager)
+            viewPager.adapter = pagerAdapter
+            tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabReselected(tab: TabLayout.Tab?) {
+                    viewPager.currentItem = tab?.position!!
+                }
 
-            }
+                override fun onTabUnselected(tab: TabLayout.Tab?) {
 
-            override fun onTabSelected(tab: TabLayout.Tab?) {
+                }
 
-            }
-        })
-        setupTabs()
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+
+                }
+            })
+            setupTabs()
+        if(!UtilPreferences.tutorial()) {
+            startActivity(Intent(this, OnBoardActivity::class.java))
+        }
     }
 
 
@@ -61,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         if (viewPager.currentItem == 0) {
             // If the user is currently looking at the first step, allow the system to handle the
             // Back button. This calls finish() on this activity and pops the back stack.
-            finishAfterTransition()
+            finishAffinity()
         } else {
             // Otherwise, select the previous step.
             viewPager.currentItem = viewPager.currentItem - 1

@@ -31,6 +31,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    repositories {
+        maven { url "https://jitpack.io" }
+    }
 }
 
 dependencies {
@@ -96,5 +100,5 @@ dependencies {
 
 
     implementation 'com.google.firebase:firebase-appindexing'
-    implementation 'com.github.AppIntro:AppIntro:6.0.0'
+      implementation 'com.github.AppIntro:AppIntro:6.0.0'
 }

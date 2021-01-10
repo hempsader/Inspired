@@ -1,15 +1,15 @@
 package com.ionut.grigore.inspired.view
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.os.PowerManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,7 +37,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -117,7 +116,7 @@ class FragmentRandom : VisibleFragment() {
                 }
             })
 
-        viewModel.observerLocalQuote().observe(viewLifecycleOwner, Observer { it ->
+        viewModel.observerLocalQuote().observe(viewLifecycleOwner, Observer {
             if (it is ResponseQuoteRandom.ResponseSuccesfull) {
                 quote = it.quote
                 quoteUI(it.quote!!)
@@ -203,6 +202,7 @@ class FragmentRandom : VisibleFragment() {
         category.visibility = View.GONE
     }
 
+    @SuppressLint("SetTextI18n")
     private fun quoteUI(quote: QuoteResponse.Quote) {
         progress.visibility = View.GONE
         inspireMeButton.visibility = View.VISIBLE
@@ -282,7 +282,9 @@ class FragmentRandom : VisibleFragment() {
         }
     }
 
-    fun termsAndCondition(){
+
+
+    private fun termsAndCondition(){
             AlertDialog.Builder(context)
                 .setTitle("Terms & Conditions")
                 .setMessage(R.string.terms_and_conditions)
@@ -293,6 +295,9 @@ class FragmentRandom : VisibleFragment() {
                     firstTimeRunNotif()
                     randomGradient()
                     mainLayout.visibility = View.VISIBLE
+                }
+                .setOnCancelListener {
+                    requireActivity().finishAffinity()
                 }
                 .setNegativeButton("Decline"){dialog, _ ->
                  requireActivity().finish()
@@ -315,6 +320,12 @@ class FragmentRandom : VisibleFragment() {
                     UtilPreferences.dailyMinute()
                 )
             }
+
+            if (!AutoStartPermissionHelper.getInstance()
+                    .isAutoStartPermissionAvailable(requireContext()) && Build.VERSION.SDK_INT < 23
+            ){
+                UtilPreferences.scheduleNewWorkSet( false)
+            }
             if (AutoStartPermissionHelper.getInstance()
                     .isAutoStartPermissionAvailable(requireContext())
             ) {
@@ -327,9 +338,10 @@ class FragmentRandom : VisibleFragment() {
                 requireContext(),
                 UtilPreferences.scheduleNewWork()
             )
-            UtilPreferences.scheduleNewWorkSet( false)
         }
     }
+
+
 
 
 

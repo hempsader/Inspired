@@ -50,4 +50,11 @@ object UtilPreferences {
                 ?.apply()
         }
 
+        fun tutorial(): Boolean = context?.getSharedPreferences("tutorial", Context.MODE_PRIVATE)?.getBoolean("tutorial", false)!!
+        fun tutorialSet(done: Boolean){
+            context?.getSharedPreferences("tutorial", Context.MODE_PRIVATE)?.edit()
+                ?.putBoolean("tutorial", done)?.apply()
+
+        }
+
 }

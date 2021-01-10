@@ -26,7 +26,6 @@ import com.ionut.grigore.inspired.util.UtilPreferences
 import com.ionut.grigore.inspired.viewModel.fetching.Fetching
 import com.ionut.grigore.inspired.viewModel.fetching.NotificationWorkStart
 import com.judemanutd.autostarter.AutoStartPermissionHelper
-import java.lang.IllegalStateException
 import java.util.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -88,6 +87,7 @@ class SettingsActivity : AppCompatActivity() {
             val sortList = findPreference<ListPreference>("sortBy_list")
             val offlineFetch = findPreference<SwitchPreferenceCompat>("offline")
             val terms = findPreference<Preference>("terms")
+            val tutorial = findPreference<Preference>("tutorial")
 
             room?.setOnPreferenceChangeListener { _, _ ->
                 if (room.isChecked) {
@@ -97,6 +97,11 @@ class SettingsActivity : AppCompatActivity() {
                     room.isChecked = true
                     UtilPreferences.roomEnableSet(true)
                 }
+                true
+            }
+
+            tutorial?.setOnPreferenceClickListener {
+                startActivity(Intent(requireContext(), OnBoardActivity::class.java))
                 true
             }
 
@@ -247,7 +252,6 @@ class SettingsActivity : AppCompatActivity() {
                 time.title = "Notification time around: $hour:$minute"
 
                 if (Build.VERSION.SDK_INT >= 23) {
-                    Log.d("xxx", "vvnnm")
                     val powerManager =
                         context?.getSystemService(Context.POWER_SERVICE) as PowerManager
                     if (!powerManager.isIgnoringBatteryOptimizations(context?.packageName)) {

@@ -45,5 +45,7 @@
     <Preference
         app:key="terms"
         app:title="Terms &amp; Conditions"/>
+    <Preference app:title="Tutorial"
+        app:key="tutorial"/>
 
 </PreferenceScreen>

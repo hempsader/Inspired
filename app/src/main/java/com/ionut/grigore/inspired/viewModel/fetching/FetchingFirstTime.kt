@@ -5,12 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.ionut.grigore.inspired.repository.QuoteRepositoryImpl
-
 import kotlinx.coroutines.*
 
 class FetchingFirstTime(private val context: Context, workerParameters: WorkerParameters): CoroutineWorker(context,workerParameters) {

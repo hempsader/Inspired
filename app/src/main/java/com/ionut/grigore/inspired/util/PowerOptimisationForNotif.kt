@@ -1,6 +1,7 @@
 package com.ionut.grigore.inspired.util
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -19,7 +20,12 @@ object PowerOptimisationForNotif {
                         AlertDialog.Builder(context)
                             .setTitle(R.string.autostart_dialog_title)
                             .setMessage(R.string.autostart_dialog_message)
+                            .setOnCancelListener {
+                                val ctx = context as Activity
+                                ctx.finishAffinity()
+                            }
                             .setPositiveButton(R.string.autostart_dialog_button) { dialog, _ ->
+                                UtilPreferences.scheduleNewWorkSet( false)
                                 dialog.dismiss()
                                 if(!AutoStartPermissionHelper.getInstance().getAutoStartPermission(context)){
                                     if(AutoStartPermissionHelper.getInstance().getAutoStartPermission(context)){
@@ -38,7 +44,16 @@ object PowerOptimisationForNotif {
                         AlertDialog.Builder(context)
                             .setTitle(R.string.battery_saver_title)
                             .setMessage(R.string.battery_saver_message)
+                            .setOnCancelListener {
+                               val ctx = context as Activity
+                                ctx.finishAffinity()
+                            }
                             .setNeutralButton(R.string.battery_saver_dismiss) { dialog, _ ->
+                                if (!AutoStartPermissionHelper.getInstance()
+                                        .isAutoStartPermissionAvailable(context)
+                                ){
+                                    UtilPreferences.scheduleNewWorkSet( false)
+                                }
                                 dialog.dismiss()
                                 val intent = Intent()
                                 val packageName = context.packageName

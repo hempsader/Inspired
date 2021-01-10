@@ -1,5 +1,6 @@
 package com.ionut.grigore.inspired.view
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -50,6 +51,7 @@ class FavouriteList(private val clickedQuote: ClickedQuote?, private val clickFa
 
         }
 
+        @SuppressLint("SetTextI18n")
         fun setup(quote: QuoteResponse.Quote){
             text.text = quote.text
             favourite.setImageResource(R.drawable.ic_baseline_favorite_24_true)

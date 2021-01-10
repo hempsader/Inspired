@@ -1,14 +1,13 @@
 package com.ionut.grigore.inspired.viewModel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ionut.grigore.inspired.util.ResponseQuoteRandom
 import com.ionut.grigore.inspired.R
 import com.ionut.grigore.inspired.model.QuoteResponse
 import com.ionut.grigore.inspired.repository.QuoteRepositoryImpl
+import com.ionut.grigore.inspired.util.ResponseQuoteRandom
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
