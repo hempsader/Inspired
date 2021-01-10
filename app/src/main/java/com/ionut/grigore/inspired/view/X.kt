@@ -1,6 +1,8 @@
 package com.ionut.grigore.inspired.view
 
 
+import android.util.Log
+import android.view.View
 import com.ionut.grigore.inspired.model.QuoteResponse
 import java.util.*
 
@@ -22,6 +24,16 @@ fun sort(sortType: Int, quoteList: ArrayList<QuoteResponse.Quote>) {
                 })
             }
         }
+}
+
+fun View.setClickDebounce(interval: Long, action : (View) -> Unit){
+    var  lastTimeClick = System.currentTimeMillis()
+    setOnClickListener {
+        if(interval + lastTimeClick < System.currentTimeMillis()){
+            lastTimeClick = System.currentTimeMillis()
+            action(it)
+        }
+    }
 }
 
 

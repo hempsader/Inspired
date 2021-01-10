@@ -11,7 +11,7 @@ data class QuoteResponse(@SerializedName("data") val quote: List<Quote>) {
     data class Quote(
         @PrimaryKey
         @SerializedName("_id") val id: String = "xxx",
-        @SerializedName("quoteText") val text: String = "Ooops..no quote fetched",
+        @SerializedName("quoteText") val text: String = "Ooops...no quote fetched",
         @SerializedName("quoteAuthor") val author: String = "Unknown Author",
         var favourite: Boolean = false,
         @SerializedName("quoteGenre") val category: String = "Unknown"

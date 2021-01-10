@@ -42,6 +42,8 @@
         <Preference app:key="autostart"
             android:title="Enable App Auto-Start"/>
     </PreferenceCategory>
-
+    <Preference
+        app:key="terms"
+        app:title="Terms &amp; Conditions"/>
 
 </PreferenceScreen>

@@ -87,6 +87,7 @@ class SettingsActivity : AppCompatActivity() {
             val autostart = findPreference<Preference>("autostart")
             val sortList = findPreference<ListPreference>("sortBy_list")
             val offlineFetch = findPreference<SwitchPreferenceCompat>("offline")
+            val terms = findPreference<Preference>("terms")
 
             room?.setOnPreferenceChangeListener { _, _ ->
                 if (room.isChecked) {
@@ -96,6 +97,16 @@ class SettingsActivity : AppCompatActivity() {
                     room.isChecked = true
                     UtilPreferences.roomEnableSet(true)
                 }
+                true
+            }
+
+            terms?.setOnPreferenceClickListener {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Terms & Conditions")
+                    .setMessage(R.string.terms_and_conditions)
+                    .setNeutralButton("Dismiss"){dialog, _ ->
+                        dialog.dismiss()
+                    }.show()
                 true
             }
 

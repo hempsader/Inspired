@@ -27,7 +27,6 @@ class GlobalApp : Application() {
         QuoteDatabase.instance(applicationContext)
         UtilPreferences.context = applicationContext
         InternetUtil.registerBroadCast()
-        QuoteDatabase.instance(applicationContext)
         notif()
     }
 

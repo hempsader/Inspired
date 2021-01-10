@@ -35,7 +35,7 @@ class NotificationWorkStart {
         }
 
         fun startPeriodic(context: Context){
-            val dailyWork = PeriodicWorkRequestBuilder<Fetching>(30, TimeUnit.MINUTES)
+            val dailyWork = PeriodicWorkRequestBuilder<Fetching>(24, TimeUnit.HOURS)
                 .addTag("work")
                 .setBackoffCriteria(BackoffPolicy.LINEAR,OneTimeWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
                 .build()
@@ -61,7 +61,7 @@ class NotificationWorkStart {
 
             return  NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
                 .setTicker("Inspire You")
-                .setSmallIcon(android.R.drawable.ic_menu_report_image)
+                .setSmallIcon(R.drawable.ic_outline_transform_24)
                 .setContentTitle(quote.author)
                 .setContentText(quote.text)
                 .setStyle(

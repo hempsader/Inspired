@@ -1,7 +1,9 @@
 package com.ionut.grigore.inspired.view
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.ConnectivityManager
@@ -35,6 +37,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -83,17 +86,7 @@ class FragmentRandom : VisibleFragment() {
         mainLayout = view.findViewById(R.id.mainLayout)
         category = view.findViewById(R.id.category)
 
-        if (savedInstanceState != null) {
-            val id = savedInstanceState.getString("quote_id")
-            val text = savedInstanceState.getString("quote_text")
-            val author = savedInstanceState.getString("quote_author")
-            val favourite = savedInstanceState.getBoolean("quote_favourite")
-            val category = savedInstanceState.getString("quote_category")
-            val quote = QuoteResponse.Quote(id!!, text!!, author!!, favourite, category!!)
-            quoteUI(quote)
-        } else {
-            firstTimeFetch()
-        }
+
             viewModel.observeRemoteQuote().observe(viewLifecycleOwner, Observer {
                 if (it is ResponseQuoteRandom.ResponseSuccesfull) {
                     if (it.quote != null) {
@@ -124,7 +117,7 @@ class FragmentRandom : VisibleFragment() {
                 }
             })
 
-        viewModel.observerLocalQuote().observe(viewLifecycleOwner, Observer {
+        viewModel.observerLocalQuote().observe(viewLifecycleOwner, Observer { it ->
             if (it is ResponseQuoteRandom.ResponseSuccesfull) {
                 quote = it.quote
                 quoteUI(it.quote!!)
@@ -136,19 +129,39 @@ class FragmentRandom : VisibleFragment() {
                 )
             }
             if (it is ResponseQuoteRandom.ResponseUnsuccessfull) {
-                cardViewMainText.visibility = View.VISIBLE
-                quoteText.visibility = View.VISIBLE
+                val quote = QuoteResponse.Quote()
+                quoteUI(quote)
                 quoteText.text = getString(R.string.no_fetched_quotes)
-                inspireMeButton.visibility = View.VISIBLE
+
+
             }
         })
 
-        inspireMeButton.setOnClickListener {
+        inspireMeButton.setClickDebounce(1000L) {
             fetchclick()
         }
+
+
+        if(!UtilPreferences.termsAndConditions()){
+            termsAndCondition()
+            mainLayout.visibility = View.GONE
+        }else{
+            if (savedInstanceState != null) {
+                val id = savedInstanceState.getString("quote_id")
+                val text = savedInstanceState.getString("quote_text")
+                val author = savedInstanceState.getString("quote_author")
+                val favourite = savedInstanceState.getBoolean("quote_favourite")
+                val category = savedInstanceState.getString("quote_category")
+                val quote = QuoteResponse.Quote(id!!, text!!, author!!, favourite, category!!)
+                quoteUI(quote)
+            } else {
+                firstTimeFetch()
+            }
+            firstTimeRunNotif()
+            randomGradient()
+        }
+
         unfavouriteUI()
-        randomGradient()
-        firstTimeRunNotif()
         return view
     }
 
@@ -166,11 +179,11 @@ class FragmentRandom : VisibleFragment() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString("quote_id", quote?.id)
-        outState.putString("quote_text", quote?.text)
-        outState.putString("quote_author", quote?.author)
+        outState.putString("quote_id", quote?.id ?: "id")
+        outState.putString("quote_text", quote?.text ?: "Oops..something went wrong, please try again!")
+        outState.putString("quote_author", quote?.author ?: "Unknown")
         outState.putBoolean("quote_favourite", quote?.favourite ?: false)
-        outState.putString("quote_category", quote?.category)
+        outState.putString("quote_category", quote?.category ?: "Unknown")
     }
 
     private fun lowMemoryDetect(): Boolean {
@@ -201,11 +214,9 @@ class FragmentRandom : VisibleFragment() {
         cardVIewButtons.visibility = View.VISIBLE
         cardViewMainText.visibility = View.VISIBLE
         randomGradient()
-        if (quote != null) {
-            quoteText.text = quote.text
-            quoteAuthor.text = quote.author
-            category.text = "#${quote.category}"
-        }
+        quoteText.text = quote.text
+        quoteAuthor.text = quote.author
+        category.text = "#${quote.category}"
     }
 
     private fun randomGradient() {
@@ -270,6 +281,24 @@ class FragmentRandom : VisibleFragment() {
             }
         }
     }
+
+    fun termsAndCondition(){
+            AlertDialog.Builder(context)
+                .setTitle("Terms & Conditions")
+                .setMessage(R.string.terms_and_conditions)
+                .setPositiveButton("Accept"){dialog, _ ->
+                    UtilPreferences.termsAndConditions(true)
+                    dialog.dismiss()
+                    firstTimeFetch()
+                    firstTimeRunNotif()
+                    randomGradient()
+                    mainLayout.visibility = View.VISIBLE
+                }
+                .setNegativeButton("Decline"){dialog, _ ->
+                 requireActivity().finish()
+                }.show()
+        }
+
 
     private fun firstTimeRunNotif() {
         if (UtilPreferences.scheduleNewWork()) {

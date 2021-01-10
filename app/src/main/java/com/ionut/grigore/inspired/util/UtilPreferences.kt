@@ -43,4 +43,11 @@ object UtilPreferences {
             context?.getSharedPreferences("offlineFetch", Context.MODE_PRIVATE)?.edit()?.putBoolean("offlineFetch", offline)?.apply()
         }
 
+        fun termsAndConditions(): Boolean = context?.getSharedPreferences("termsAndConditions", Context.MODE_PRIVATE)?.getBoolean("termsAndConditions", false)!!
+        fun termsAndConditions(accepted: Boolean){
+            context?.getSharedPreferences("termsAndConditions", Context.MODE_PRIVATE)?.edit()
+                ?.putBoolean("termsAndConditions",accepted)
+                ?.apply()
+        }
+
 }
