@@ -54,7 +54,11 @@ object UtilPreferences {
         fun tutorialSet(done: Boolean){
             context?.getSharedPreferences("tutorial", Context.MODE_PRIVATE)?.edit()
                 ?.putBoolean("tutorial", done)?.apply()
-
+        }
+        fun serverPressure(): Boolean = context?.getSharedPreferences("server", Context.MODE_PRIVATE)?.getBoolean("server",false)!!
+        fun serverPressureSet(read: Boolean){
+            context?.getSharedPreferences("server", Context.MODE_PRIVATE)?.edit()
+                ?.putBoolean("server", read)?.apply()
         }
 
 }

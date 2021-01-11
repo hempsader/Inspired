@@ -341,17 +341,11 @@ class FragmentRandom : VisibleFragment() {
         }
     }
 
-
-
-
-
-
     @InternalCoroutinesApi
     private fun fetchclick() {
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
-            InternetUtil.getState().collectLatest { state ->
-                    when (state) {
-                        State.CONNECTED -> {
+        val manager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        when(manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!){
+                        true-> {
                             if (!UtilPreferences.offlineFetch()!!) {
                                 viewModel.fetchQuoteRemote()
                                 loadingQuoteUI()
@@ -360,13 +354,11 @@ class FragmentRandom : VisibleFragment() {
                                 loadingQuoteUI()
                             }
                         }
-                        State.DISSCONNECTED -> {
+                        false -> {
                             loadingQuoteUI()
                             viewModel.fetchLocalQuote()
                         }
                     }
-                }
-        }
     }
 }
 

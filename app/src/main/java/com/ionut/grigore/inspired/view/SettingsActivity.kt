@@ -116,7 +116,10 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             hour.setOnPreferenceClickListener {
-                attention(requireContext())
+                if(!UtilPreferences.serverPressure()) {
+                    attention(requireContext())
+                }
+                UtilPreferences.serverPressureSet(true)
                 true
             }
 
