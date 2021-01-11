@@ -10,6 +10,7 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,13 +32,11 @@ import com.ionut.grigore.inspired.util.*
 import com.ionut.grigore.inspired.viewModel.QuoteViewModel
 import com.ionut.grigore.inspired.viewModel.fetching.NotificationWorkStart
 import com.judemanutd.autostarter.AutoStartPermissionHelper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.Job
+import kotlinx.android.synthetic.main.main_fragment.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
@@ -90,6 +89,7 @@ class FragmentRandom : VisibleFragment() {
                 if (it is ResponseQuoteRandom.ResponseSuccesfull) {
                     if (it.quote != null) {
                         quote = it.quote
+                        Log.d("xxx", quote?.author.toString())
                         quoteUI(it.quote)
                         favouriteImageView.setOnClickListener {view->
                             favourite(it.quote)
@@ -131,8 +131,6 @@ class FragmentRandom : VisibleFragment() {
                 val quote = QuoteResponse.Quote()
                 quoteUI(quote)
                 quoteText.text = getString(R.string.no_fetched_quotes)
-
-
             }
         })
 
@@ -146,6 +144,7 @@ class FragmentRandom : VisibleFragment() {
             mainLayout.visibility = View.GONE
         }else{
             if (savedInstanceState != null) {
+                Log.d("xxx", quote?.author.toString())
                 val id = savedInstanceState.getString("quote_id")
                 val text = savedInstanceState.getString("quote_text")
                 val author = savedInstanceState.getString("quote_author")
@@ -160,7 +159,13 @@ class FragmentRandom : VisibleFragment() {
             randomGradient()
         }
 
+        Log.d("xxx", activity?.filesDir?.absoluteFile.toString())
+
         unfavouriteUI()
+        TmpGenerateDB().generateList {
+
+        }
+
         return view
     }
 
@@ -183,7 +188,11 @@ class FragmentRandom : VisibleFragment() {
         outState.putString("quote_author", quote?.author ?: "Unknown")
         outState.putBoolean("quote_favourite", quote?.favourite ?: false)
         outState.putString("quote_category", quote?.category ?: "Unknown")
+        super.onSaveInstanceState(outState)
     }
+
+
+
 
     private fun lowMemoryDetect(): Boolean {
 
@@ -201,6 +210,7 @@ class FragmentRandom : VisibleFragment() {
         cardVIewButtons.visibility = View.GONE
         category.visibility = View.GONE
     }
+
 
     @SuppressLint("SetTextI18n")
     private fun quoteUI(quote: QuoteResponse.Quote) {
@@ -300,7 +310,7 @@ class FragmentRandom : VisibleFragment() {
                     requireActivity().finishAffinity()
                 }
                 .setNegativeButton("Decline"){dialog, _ ->
-                 requireActivity().finish()
+                 requireActivity().finishAffinity()
                 }.show()
         }
 
@@ -327,10 +337,10 @@ class FragmentRandom : VisibleFragment() {
                 UtilPreferences.scheduleNewWorkSet( false)
             }
             if (AutoStartPermissionHelper.getInstance()
-                    .isAutoStartPermissionAvailable(requireContext())
+                    .isAutoStartPermissionAvailable(requireActivity())
             ) {
                 PowerOptimisationForNotif.enableAutoStart(
-                    requireContext(),
+                    requireActivity(),
                     UtilPreferences.scheduleNewWork()
                 )
             }
