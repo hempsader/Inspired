@@ -58,14 +58,22 @@ class FragmentFavourite : VisibleFragment(), ClickedQuote,
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.favouriteMutableLiveData.observe(viewLifecycleOwner, Observer {list->
+            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Unconfined){
+                sort(UtilPreferences.sortType(), list as java.util.ArrayList<QuoteResponse.Quote>)
+                withContext(Dispatchers.Main){
+                    adapterFavourites?.setList(list)
+                }
+            }
                     sort(UtilPreferences.sortType(), list as ArrayList)
                        adapterFavourites?.setList(list)
             swipeLayout?.setOnRefreshListener {
                 viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Unconfined){
-                    sort(UtilPreferences.sortType(), list)
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.IO){
+                        sort(UtilPreferences.sortType(), list)
                         swipeLayout?.isRefreshing = false
-                        adapterFavourites?.setList(list)
+                        withContext(Dispatchers.Main) {
+                            adapterFavourites?.setList(list)
+                        }
                     }
                 }
             }

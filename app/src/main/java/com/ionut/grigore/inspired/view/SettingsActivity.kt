@@ -106,7 +106,7 @@ class SettingsActivity : AppCompatActivity() {
             }
 
             terms?.setOnPreferenceClickListener {
-                AlertDialog.Builder(requireContext())
+                AlertDialog.Builder(requireActivity())
                     .setTitle("Terms & Conditions")
                     .setMessage(R.string.terms_and_conditions)
                     .setNeutralButton("Dismiss"){dialog, _ ->
@@ -118,6 +118,8 @@ class SettingsActivity : AppCompatActivity() {
             hour.setOnPreferenceClickListener {
                 if(!UtilPreferences.serverPressure()) {
                     attention(requireContext())
+                }else{
+                    TimePick(hour).show(parentFragmentManager, "setHour")
                 }
                 UtilPreferences.serverPressureSet(true)
                 true
@@ -152,7 +154,7 @@ class SettingsActivity : AppCompatActivity() {
             ) {
                 autostart?.isVisible = true
                 autostart?.setOnPreferenceClickListener {
-                    PowerOptimisationForNotif.enableAutoStart(requireContext(), true)
+                    PowerOptimisationForNotif.enableAutoStart(requireActivity(), true)
                     true
                 }
             }
