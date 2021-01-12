@@ -10,6 +10,6 @@ interface QuoteRepository {
     suspend fun randomQuote(): Response<QuoteResponse>
     suspend fun getQuoteRandomFromDb(): List<QuoteResponse.Quote>?
     suspend fun updateQuote(quote: QuoteResponse.Quote)
-    suspend fun fetchAll(): Flow<List<QuoteResponse.Quote>>
+     fun fetchAll(): Flow<List<QuoteResponse.Quote>>
 
 }

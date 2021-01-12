@@ -8,7 +8,6 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import com.ionut.grigore.inspired.room.QuoteDatabase
-import com.ionut.grigore.inspired.util.InternetUtil
 import com.ionut.grigore.inspired.util.UtilPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,11 +20,8 @@ class GlobalApp : Application() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
-       val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        InternetUtil.initialise(applicationContext, applicationScope)
         QuoteDatabase.instance(applicationContext)
         UtilPreferences.context = applicationContext
-        InternetUtil.registerBroadCast()
         notif()
 
     }

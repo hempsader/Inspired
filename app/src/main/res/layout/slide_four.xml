@@ -43,7 +43,7 @@
         android:layout_marginEnd="32dp"
         android:elegantTextHeight="true"
         android:fontFamily="@font/roboto"
-        android:text="In settings menu you can choose if you want daily notification, set time for daily quote  notification, save quotes offline, favourite sort by.., disable battery saver for receive daily notification when phone have battery saver on, or enable autostart (if phone support)"
+        android:text="In settings menu you can choose if you want daily quote notification, set time for daily quote notification, save quotes offline, favourite quotes sort by.., disable battery saver for receive daily notification when phone have battery saver on, or enable autostart (if device support it)"
         android:textColor="#FFFFFF"
         android:textIsSelectable="false"
         app:autoSizeTextType="none"

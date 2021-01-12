@@ -54,6 +54,7 @@ object PowerOptimisationForNotif {
                                 ){
                                     UtilPreferences.scheduleNewWorkSet( false)
                                 }
+
                                 dialog.dismiss()
                                 val intent = Intent()
                                 val packageName = context.packageName

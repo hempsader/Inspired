@@ -117,6 +117,8 @@ class FragmentRandom : VisibleFragment() {
                 }
             })
 
+
+
         viewModel.observerLocalQuote().observe(viewLifecycleOwner, Observer {
             if (it is ResponseQuoteRandom.ResponseSuccesfull) {
                 quoteBuffer = it.quote
@@ -146,11 +148,7 @@ class FragmentRandom : VisibleFragment() {
             fetchclick()
         }
 
-
-
-
         unfavouriteUI()
-
         return view
     }
 

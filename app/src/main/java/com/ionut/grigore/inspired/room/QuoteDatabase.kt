@@ -6,9 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 import com.ionut.grigore.inspired.model.QuoteResponse
-import java.io.File
 
-@Database(entities = [QuoteResponse.Quote::class], version = 31)
+@Database(entities = [QuoteResponse.Quote::class], version = 37, exportSchema = false)
 abstract class QuoteDatabase : RoomDatabase(){
     abstract fun quoteDao(): QuoteDao
 
@@ -18,8 +17,9 @@ abstract class QuoteDatabase : RoomDatabase(){
             synchronized(Any()){
                 return if(INSTANCE == null) {
                     val db = Room.databaseBuilder(context,QuoteDatabase::class.java,"quote_db")
-                    //    .createFromAsset("quote_db")
-                        .fallbackToDestructiveMigration().build()
+                        .createFromAsset("initial_db")
+                        .fallbackToDestructiveMigration()
+                        .build()
                     INSTANCE = db
                     INSTANCE
                 }else{

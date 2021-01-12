@@ -33,7 +33,7 @@ class QuoteRepositoryImpl: QuoteRepository{
         dao?.updateFavourite(quote)
     }
 
-    override suspend fun fetchAll(): Flow<List<QuoteResponse.Quote>> {
+    override  fun fetchAll(): Flow<List<QuoteResponse.Quote>> {
       return  dao?.fetchAll()!!
     }
 
