@@ -18,9 +18,12 @@ class InternetUtil {
         @ExperimentalCoroutinesApi
         private val flow = ConflatedBroadcastChannel<State>()
         private fun initialiseConnectivity(context: Context): Boolean {
-            val manager =
-                context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            return manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!
+            if(context != null) {
+                val manager =
+                    context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                return manager.activeNetworkInfo != null && manager.activeNetworkInfo?.isConnected!!
+            }
+           return false
         }
         private var context: Context? = null
         private var coroutineScope: CoroutineScope? = null

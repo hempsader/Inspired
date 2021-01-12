@@ -42,7 +42,7 @@ class DialogFavourite(private val quote: QuoteResponse.Quote): DialogFragment(){
                     putExtra(Intent.EXTRA_TEXT, quote.text + " - " + quote.author)
                     type = "text/plain"
                 }
-                requireContext().startActivity(Intent.createChooser(shareQuote,"Inspired Quote"))
+                requireContext().startActivity(Intent.createChooser(shareQuote,getString(R.string.chooser_title)))
             }
         }
         view.findViewById<Button>(R.id.button_dismiss).apply {

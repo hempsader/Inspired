@@ -9,7 +9,7 @@ import android.graphics.drawable.GradientDrawable
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,7 +36,6 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -52,7 +51,7 @@ class FragmentRandom : VisibleFragment() {
     private lateinit var cardVIewButtons: CardView
     private lateinit var mainLayout: ConstraintLayout
     private lateinit var category: TextView
-    private var quote: QuoteResponse.Quote? = null
+    private var quoteBuffer: QuoteResponse.Quote? = null
 
 
     private val viewModel by lazy {
@@ -65,6 +64,8 @@ class FragmentRandom : VisibleFragment() {
             }
         })[QuoteViewModel::class.java]
     }
+
+
 
     @RequiresApi(Build.VERSION_CODES.M)
     @InternalCoroutinesApi
@@ -89,7 +90,7 @@ class FragmentRandom : VisibleFragment() {
             viewModel.observeRemoteQuote().observe(viewLifecycleOwner, Observer {
                 if (it is ResponseQuoteRandom.ResponseSuccesfull) {
                     if (it.quote != null) {
-                        quote = it.quote
+                        quoteBuffer = it.quote
                         quoteUI(it.quote)
                         favouriteImageView.setOnClickListener {view->
                             favourite(it.quote)
@@ -118,7 +119,7 @@ class FragmentRandom : VisibleFragment() {
 
         viewModel.observerLocalQuote().observe(viewLifecycleOwner, Observer {
             if (it is ResponseQuoteRandom.ResponseSuccesfull) {
-                quote = it.quote
+                quoteBuffer = it.quote
                 quoteUI(it.quote!!)
                 favouriteImageView.setOnClickListener {view->
                     favourite(it.quote)
@@ -129,8 +130,13 @@ class FragmentRandom : VisibleFragment() {
             }
             if (it is ResponseQuoteRandom.ResponseUnsuccessfull) {
                 val quote = QuoteResponse.Quote()
-                quoteUI(quote)
-                quoteText.text = getString(R.string.no_fetched_quotes)
+                if(quoteBuffer != null) {
+                    quoteUI(quoteBuffer!!)
+                }else{
+                    quoteUI(quote)
+                    quoteText.text = getString(R.string.no_fetched_quotes)
+                }
+
 
 
             }
@@ -141,6 +147,14 @@ class FragmentRandom : VisibleFragment() {
         }
 
 
+
+
+        unfavouriteUI()
+
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         if(!UtilPreferences.termsAndConditions()){
             termsAndCondition()
             mainLayout.visibility = View.GONE
@@ -151,7 +165,7 @@ class FragmentRandom : VisibleFragment() {
                 val author = savedInstanceState.getString("quote_author")
                 val favourite = savedInstanceState.getBoolean("quote_favourite")
                 val category = savedInstanceState.getString("quote_category")
-                val quote = QuoteResponse.Quote(id!!, text!!, author!!, favourite, category!!)
+                val quote = QuoteResponse.Quote(id ?: "0", text ?: "No fetched quote..please go online!", author ?: "Unknown", favourite , category ?: "Unknown")
                 quoteUI(quote)
             } else {
                 firstTimeFetch()
@@ -159,18 +173,14 @@ class FragmentRandom : VisibleFragment() {
             firstTimeRunNotif()
             randomGradient()
         }
-
-        unfavouriteUI()
-        return view
     }
-
 
     @InternalCoroutinesApi
     private fun unfavouriteUI() {
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Main) {
             UnfavouriteFlow.readFavourite().asFlow().collect {
-                if (quote?.id == it.id) {
-                    quote?.favourite = false
+                if (quoteBuffer?.id == it.id) {
+                    quoteBuffer?.favourite = false
                     favouriteImageView.setIconResource(R.drawable.ic_outline_favorite_border_24_false)
                 }
             }
@@ -178,12 +188,19 @@ class FragmentRandom : VisibleFragment() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString("quote_id", quote?.id ?: "id")
-        outState.putString("quote_text", quote?.text ?: "Oops..something went wrong, please try again!")
-        outState.putString("quote_author", quote?.author ?: "Unknown")
-        outState.putBoolean("quote_favourite", quote?.favourite ?: false)
-        outState.putString("quote_category", quote?.category ?: "Unknown")
+        if (quoteBuffer != null){
+            outState?.apply {
+                putString("quote_id", quoteBuffer?.id ?: "id")
+                putString("quote_author", quoteBuffer?.author ?: "Unknown")
+                putString("quote_text", quoteBuffer?.text ?: "Ooop..something went wrong.")
+                putBoolean("quote_favourite", quoteBuffer?.favourite ?: false)
+                putString("quote_category", quoteBuffer?.category ?: "Unknown")
+            }
+        }
+        super.onSaveInstanceState(outState)
     }
+
+
 
     private fun lowMemoryDetect(): Boolean {
 
@@ -250,10 +267,10 @@ class FragmentRandom : VisibleFragment() {
     private fun shareQuote(quote: QuoteResponse.Quote) {
             val shareQuote = Intent().apply{
                 action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, quote.text + " - " + quote.author)
+                putExtra(Intent.EXTRA_TEXT, "${quote.text} - ${quote.author}")
                 type = "text/plain"
             }
-            requireContext().startActivity(Intent.createChooser(shareQuote,R.string.chooser_title.toString() ))
+            requireContext().startActivity(Intent.createChooser(shareQuote, getString(R.string.chooser_title)))
         }
 
 
