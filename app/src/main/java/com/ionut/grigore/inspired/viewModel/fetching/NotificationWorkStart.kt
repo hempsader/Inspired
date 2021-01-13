@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.*
 import com.ionut.grigore.inspired.R
@@ -24,7 +25,9 @@ class NotificationWorkStart {
             if(dueDate.before(currentDate)){
                 dueDate.add(Calendar.HOUR_OF_DAY, 24)
             }
+
             val timeDiff = dueDate.timeInMillis - currentDate.timeInMillis
+            Log.d("xxx", timeDiff.toString())
             val dailyWork = OneTimeWorkRequestBuilder<FetchingFirstTime>()
                 .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
                 .setBackoffCriteria(BackoffPolicy.LINEAR,OneTimeWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)

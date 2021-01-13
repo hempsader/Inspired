@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -84,7 +85,6 @@ class FetchingFirstTime(private val context: Context, workerParameters: WorkerPa
         }
         applicationContext.sendOrderedBroadcast(intent, PERM_PRIVATE)
     }
-
         companion object{
             const val ACTION_SHOW_NOTIFICATION = "com.ionut.grigore.inspired.SHOW_NOTIFICATION"
             const val PERM_PRIVATE = "com.ionut.grigore.inspired.PRIVATE"

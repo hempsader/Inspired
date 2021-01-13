@@ -9,9 +9,6 @@ import android.provider.Settings
 import androidx.annotation.RequiresApi
 import com.ionut.grigore.inspired.room.QuoteDatabase
 import com.ionut.grigore.inspired.util.UtilPreferences
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 
 
 const val NOTIFICATION_CHANNEL_ID = "quote"

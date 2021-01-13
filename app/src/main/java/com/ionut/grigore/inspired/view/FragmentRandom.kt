@@ -9,7 +9,6 @@ import android.graphics.drawable.GradientDrawable
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,7 +26,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.ionut.grigore.inspired.R
 import com.ionut.grigore.inspired.model.QuoteResponse
 import com.ionut.grigore.inspired.repository.QuoteRepositoryImpl
-import com.ionut.grigore.inspired.util.*
+import com.ionut.grigore.inspired.util.PowerOptimisationForNotif
+import com.ionut.grigore.inspired.util.ResponseQuoteRandom
+import com.ionut.grigore.inspired.util.UnfavouriteFlow
+import com.ionut.grigore.inspired.util.UtilPreferences
 import com.ionut.grigore.inspired.viewModel.QuoteViewModel
 import com.ionut.grigore.inspired.viewModel.fetching.NotificationWorkStart
 import com.judemanutd.autostarter.AutoStartPermissionHelper
@@ -187,7 +189,7 @@ class FragmentRandom : VisibleFragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         if (quoteBuffer != null){
-            outState?.apply {
+            outState.apply {
                 putString("quote_id", quoteBuffer?.id ?: "id")
                 putString("quote_author", quoteBuffer?.author ?: "Unknown")
                 putString("quote_text", quoteBuffer?.text ?: "Ooop..something went wrong.")

@@ -1,7 +1,7 @@
 package com.ionut.grigore.inspired.view
 
+
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,8 +18,6 @@ import com.ionut.grigore.inspired.repository.QuoteRepositoryImpl
 import com.ionut.grigore.inspired.util.DialogFavourite
 import com.ionut.grigore.inspired.util.UtilPreferences
 import com.ionut.grigore.inspired.viewModel.QuoteFavouriteViewModel
-
-
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -57,6 +55,10 @@ class FragmentFavourite : VisibleFragment(), ClickedQuote,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
+
+
 
         viewModel.favouriteMutableLiveData.observe(viewLifecycleOwner, Observer {list->
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.Unconfined){

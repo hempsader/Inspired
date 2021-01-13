@@ -1,6 +1,5 @@
 package com.ionut.grigore.inspired.repository
 
-import android.util.Log
 import com.ionut.grigore.inspired.api.QuoteApi
 import com.ionut.grigore.inspired.model.QuoteResponse
 import com.ionut.grigore.inspired.room.QuoteDatabase

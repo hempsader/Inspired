@@ -2,7 +2,6 @@ package com.ionut.grigore.inspired.view
 
 
 import android.os.CountDownTimer
-import android.util.Log
 import android.view.View
 import com.ionut.grigore.inspired.model.QuoteResponse
 import java.util.*

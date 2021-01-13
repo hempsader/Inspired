@@ -162,7 +162,7 @@ class SettingsActivity : AppCompatActivity() {
             sortList?.setOnPreferenceChangeListener { _, newValue ->
                 UtilPreferences.sortTypeSet(sortTextInt(newValue as String))
                 sortList.title = sortTextString(UtilPreferences.sortType())
-                sortList?.setValueIndex(UtilPreferences.sortType())
+                sortList.setValueIndex(UtilPreferences.sortType())
                 false
             }
             if (!daily?.isChecked!!) {
